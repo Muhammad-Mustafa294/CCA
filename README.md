@@ -15,12 +15,12 @@ Three roles, switched from the black bar at the top:
 | Role | What it shows |
 |---|---|
 | **Public site** | Society directory with search-as-you-type and category filters, society profiles, the campus events calendar, event pages, policies, and a "Work with Us" section for sponsors. |
-| **Society portal** | A society executive signs in and sends CCA any of six request types — venue booking, PR request, event proposal, equipment and logistics, sponsorship/NOC, profile update — each with a reference number and a live status. |
+| **Society portal** | A society executive signs in and sends CCA any of seven request types — venue booking, PR request, event proposal, equipment and logistics, sponsorship/NOC, profile update, other — each with a reference number, a live status and a one-working-day reply target. |
 | **CCA staff** | The request inbox, the venue calendar, and the website queue. Approve, request changes, or decline; the society is emailed either way. |
 
 Two moments worth building the pitch around:
 
-1. **The clash check.** Book the Main Auditorium on 18 February, 6–9 PM, and the form tells you LUMUN already holds it 17:00–21:00 — *before* the request is sent. Email cannot do that.
+1. **The availability check.** Start a venue booking, enter 18 February, 6–9 PM, 120 people. Only HSS rooms (A1–A15) that are free and big enough can be picked; HSS A1 shows as booked by LUMUN 17:00–21:00 and can't be chosen — *before* the request is sent. Email cannot do that.
 2. **Approve once, publish everywhere.** Submit an event proposal in the portal, approve it as CCA staff, then switch to the public Events Calendar. It is there. Nothing was retyped.
 
 The **Email trail** button (bottom right) logs every email the system would send, to `cca@lums.edu.pk` and the society. The point: the portal does not replace Outlook, it keeps the record there *and* gives it a status.
@@ -59,7 +59,7 @@ app.js        routing, rendering, the request flow
 - `SOCIETIES` — add a society. Copy an existing block, change the fields. `pic` is an index into the `PIC` array in `app.js`.
 - `EVENTS` — add an event. Dates are `YYYY-MM-DD`; the weekday is worked out for you.
 - `VENUES` / `BOOKINGS` — venues and who already holds them. `BOOKINGS` drives the clash check.
-- `REQ_TYPES` — the six request types and their reply times.
+- `REQ_TYPES` — the seven request types and their reply times.
 - `REQUESTS` / `EMAILS` — the sample requests and email trail the demo opens with.
 
 **Colours and spacing** — the `:root` block at the top of `styles.css`. Change a token once and it applies everywhere. Dark mode tokens are in the two blocks directly below it; change both.

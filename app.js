@@ -8,9 +8,8 @@ var esc=function(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){r
 var MONTH=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 var FULLM=["January","February","March","April","May","June","July","August","September","October","November","December"];
 var DAY=["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
-var PIC=["hero.jpg","adv.jpg","ev1.jpg","ev2.jpg","ev3.jpg","ev4.jpg"];
 
-var S={mode:"public",view:"home",p:{},q:"",gq:"",slide:0,cat:"All",evTab:"upcoming",signed:false,soc:"lds",draft:{},inbox:"all",sheet:false};
+var S={mode:"public",view:"home",p:{},q:"",gq:"",slide:0,paused:false,rec:false,cat:"All",evTab:"upcoming",signed:false,soc:"lds",draft:{},inbox:"all",sheet:false};
 var toastT=null;
 function soc(id){for(var i=0;i<SOCIETIES.length;i++)if(SOCIETIES[i].id===id)return SOCIETIES[i];return SOCIETIES[0]}
 function venue(id){for(var i=0;i<VENUES.length;i++)if(VENUES[i].id===id)return VENUES[i];return null}
@@ -28,7 +27,9 @@ var I={search:'<circle cx="8" cy="8" r="5.5"/><path d="M12.5 12.5 16 16"/>',arro
  building:'<rect x="3" y="2.5" width="12" height="13" rx="1"/><path d="M6.5 6h2M9.5 6h2M6.5 9h2M9.5 9h2M7.5 15.5v-3h3v3"/>',mega:'<path d="M3 7v4l9 4V3L3 7Z"/><path d="M12 6a3 3 0 0 1 0 6"/>',
  box:'<path d="M2.5 6 9 2.5 15.5 6v6L9 15.5 2.5 12V6Z"/><path d="M2.5 6 9 9.5 15.5 6M9 9.5v6"/>',doc:'<path d="M4.5 2.5h6L14 6v9.5H4.5Z"/><path d="M10.5 2.5V6H14"/><path d="M6.5 9h5M6.5 12h5"/>',
  user:'<circle cx="9" cy="6" r="3"/><path d="M3.5 15.5c.8-3 2.9-4.5 5.5-4.5s4.7 1.5 5.5 4.5"/>',mail:'<rect x="2.5" y="4" width="13" height="10" rx="1"/><path d="m3 5.5 6 4.5 6-4.5"/>',
- check:'<path d="M3.5 9.5 7 13l7.5-8"/>'};
+ check:'<path d="M3.5 9.5 7 13l7.5-8"/>',lock:'<rect x="3.5" y="8" width="11" height="7.5" rx="1.5"/><path d="M6 8V5.5a3 3 0 0 1 6 0V8"/>',
+ dots:'<circle cx="4" cy="9" r="1.1"/><circle cx="9" cy="9" r="1.1"/><circle cx="14" cy="9" r="1.1"/>',
+ pause:'<path d="M6.5 4v10M11.5 4v10"/>',play:'<path d="M6 4l8 5-8 5Z"/>',spark:'<path d="M9 2v4M9 12v4M2 9h4M12 9h4M4.5 4.5l2 2M11.5 11.5l2 2M4.5 13.5l2-2M11.5 6.5l2-2"/>'};
 function ic(n){return '<svg class="ico" viewBox="0 0 18 18" aria-hidden="true">'+I[n]+'</svg>'}
 
 var MODES=[["public","Public site"],["portal","Society portal"],["staff","CCA staff"]];
@@ -44,38 +45,45 @@ function paintChrome(){
   $("#nav").innerHTML=nav.map(function(n){return '<button data-go="'+n[0]+'"'+(cur===n[0]?' aria-current="page"':'')+'>'+esc(n[1])+'</button>'}).join("");
   $("#officeTitle").textContent="Office of Co-Curricular Activities";
   document.querySelector(".brandtitle .bk").textContent=S.mode==="staff"?"CCA staff workspace":S.mode==="portal"?"Society portal":"LUMS Campus Life";
-  $("#whoami").innerHTML=S.mode==="portal"&&S.signed?'<b>'+esc(soc(S.soc).short)+'</b>Society executive'
-    :(S.mode==="staff"?'<b>Ayesha Arshad</b>CCA staff':'');
   $("#mailCount").textContent=EMAILS.length;
 }
 var SLIDES=[
- {pic:0,kick:"Welcome to CCA",title:"Find your people.<br>Do what matters.",text:"Every society, every event, and every way to get involved at LUMS \u2014 all in one place.",btn:["socs","Explore societies"]},
- {pic:2,kick:"Spring 2027",title:"Recruitment season<br>is open.",text:"Debate, film, startups, service and more. Applications close at the end of February.",btn:["socs","See who\u2019s recruiting"]},
- {pic:3,kick:"This week on campus",title:"Something on,<br>every evening.",text:"Screenings, open houses, workshops and tournaments, all approved and listed by CCA.",btn:["events","Open the calendar"]}
+ {src:"img/banner/lcss.jpg",credit:"LUMS Community Service Society",kick:"Welcome to CCA",title:"Find your people.<br>Do what matters.",text:"Every society, every event, and every way to get involved at LUMS \u2014 all in one place.",btn:["socs","Explore societies"]},
+ {src:"img/banner/las.jpg",credit:"LUMS Adventure Society",kick:"Spring 2027",title:"Recruitment season<br>is open.",text:"Debate, film, startups, service and more. Applications close at the end of February.",btn:["socs","See who\u2019s recruiting"]},
+ {src:"img/photo/equestrian.jpg",credit:"LUMS Equestrian Club \u00b7 Arena Polo",kick:"This week on campus",title:"Something on,<br>every evening.",text:"Screenings, open houses, workshops and tournaments, all approved and listed by CCA.",btn:["events","Open the calendar"]}
 ];
 function heroBlock(){
   if(!(S.mode==="public"&&S.view==="home"))return "";
-  return '<section class="slider" aria-roledescription="carousel" aria-label="Highlights">'
-   +SLIDES.map(function(s,i){return '<div class="slide'+(i===S.slide?' on':'')+'" aria-hidden="'+(i!==S.slide)+'"><img class="bg" src="'+PIC[s.pic]+'" alt="">'
+  return '<section class="slider'+(S.paused?' paused':'')+'" aria-roledescription="carousel" aria-label="Highlights">'
+   +SLIDES.map(function(s,i){return '<div class="slide'+(i===S.slide?' on':'')+'" aria-hidden="'+(i!==S.slide)+'"><img class="bg" src="'+s.src+'" alt=""><span class="credit">'+s.credit+'</span>'
      +'<div class="inner"><div class="panel"><div class="kick">'+s.kick+'</div><h2>'+s.title+'</h2><div class="rule"></div><p>'+s.text+'</p>'
      +'<div class="row"><button class="btn gold" data-go="'+s.btn[0]+'"'+(i!==S.slide?' tabindex="-1"':'')+'>'+s.btn[1]+' '+ic("arrow")+'</button></div></div></div></div>'}).join("")
    +'<div class="sctl"><button class="sarr" data-slide="prev" aria-label="Previous slide">'+ic("back")+'</button>'
    +'<span class="dots">'+SLIDES.map(function(s,i){return '<button class="sdot" data-slide="'+i+'" aria-label="Slide '+(i+1)+'" aria-current="'+(i===S.slide)+'"></button>'}).join("")+'</span>'
-   +'<button class="sarr" data-slide="next" aria-label="Next slide">'+ic("arrow")+'</button></div></section>';
+   +'<button class="sarr" data-slide="next" aria-label="Next slide">'+ic("arrow")+'</button>'
+   +'<button class="sarr" data-slide="toggle" aria-label="'+(S.paused?"Play slideshow":"Pause slideshow")+'">'+ic(S.paused?"play":"pause")+'</button></div></section>';
 }
+var RM=!!(window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches),slideT=null;
 function setSlide(n){
   S.slide=(n+SLIDES.length)%SLIDES.length;
   var sl=document.querySelectorAll(".slide"),dt=document.querySelectorAll(".sdot");
   for(var i=0;i<sl.length;i++){sl[i].classList.toggle("on",i===S.slide);sl[i].setAttribute("aria-hidden",i!==S.slide);
     var b=sl[i].querySelector(".btn");if(b){if(i===S.slide)b.removeAttribute("tabindex");else b.setAttribute("tabindex","-1")}}
-  for(var k=0;k<dt.length;k++)dt[k].setAttribute("aria-current",k===S.slide);
+  for(var k=0;k<dt.length;k++)dt[k].setAttribute("aria-current","false");
+  if(dt.length){void dt[0].offsetWidth;dt[S.slide].setAttribute("aria-current","true")}
+  autoplay();
 }
-if(!(window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches))
-  setInterval(function(){var s=document.querySelector(".slider");if(s&&!s.matches(":hover")&&!s.contains(document.activeElement))setSlide(S.slide+1)},6500);
+function autoplay(){
+  clearTimeout(slideT);if(RM||S.paused||!document.querySelector(".slider"))return;
+  slideT=setTimeout(function(){var s=document.querySelector(".slider");if(!s)return;
+    if(s.contains(document.activeElement)&&document.activeElement!==document.body)autoplay();else setSlide(S.slide+1)},6500);
+}
 function statsBlock(){
   if(!(S.mode==="public"&&S.view==="home"))return "";
   var S4=[["45+","Societies &amp; Clubs"],["300+","Annual Events / Projects"],["1000+","Event Participants"],["2,078,005","Sponsorship Raised (PKR)"]];
-  return '<div class="stats"><div class="inner"><h2 class="h2 sh">Quick facts</h2><div class="sg">'+S4.map(function(s){return '<div><div class="n tnum">'+s[0]+'</div><div class="l">'+s[1]+'</div></div>'}).join("")+'</div></div></div>';
+  return '<div class="stats"><div class="inner"><div class="kick" style="color:#7FE3FF">CCA in numbers</div><h2 class="h2 sh">Quick facts</h2><div class="sg">'+S4.map(function(s){
+    var n=+s[0].replace(/[^0-9]/g,""),suf=s[0].replace(/[0-9,]/g,"");
+    return '<div><div class="n tnum" data-to="'+n+'" data-suf="'+suf+'">'+s[0]+'</div><div class="l">'+s[1]+'</div></div>'}).join("")+'</div></div></div>';
 }
 
 function evCard(e){
@@ -83,8 +91,16 @@ function evCard(e){
    +'<span class="body"><span class="when">'+esc(dayOf(e.d))+' &middot; '+esc(e.t)+'</span><span class="t">'+esc(e.title)+'</span>'
    +'<span class="d">'+esc(soc(e.soc).name)+'</span><span class="d">'+esc(e.venue)+'</span></span></span></button>';
 }
+var CATC={"Debate & MUN":"#04198B","Academic":"#2E3192","Tech":"#00607A","Service":"#1C7A46","Arts & Culture":"#7A2E8E","Sports":"#9A4A00","Media":"#A32020"};
+/* Official society logo (from cca.lums.edu.pk) on a white tile; a monogram only if CCA has no logo on file. */
+function logoTile(s){
+  if(s.logo)return '<span class="slogo"><img src="'+esc(s.logo)+'" alt="'+esc(s.name)+' logo" loading="lazy"></span>';
+  return '<span class="cov" style="--cc:'+(CATC[s.cat]||"#04198B")+'"><span class="mono">'+esc(s.short)+'</span><span class="ccat">'+esc(s.cat)+'</span></span>';
+}
+/* Banner for a society or its events: the society's own photo if it has one, otherwise its logo. */
+function banner(s){return s.photo?'<img src="'+esc(s.photo)+'" alt="">':logoTile(s)}
 function socCard(s){
-  return '<button class="card photo" data-soc="'+s.id+'"><img src="'+PIC[s.pic]+'" alt=""><span class="body">'
+  return '<button class="card photo" data-soc="'+s.id+'">'+logoTile(s)+'<span class="body">'
    +'<span>'+(s.recruiting?'<span class="pill ok">Recruiting</span>':'<span class="pill grey">Applications closed</span>')+'</span>'
    +'<span class="t">'+esc(s.name)+'</span><span class="d">'+esc(s.tag)+'</span></span></button>';
 }
@@ -95,9 +111,9 @@ var AUDIENCE=[
  ["Parents & visitors",[["events","Public events"],["about","About campus life"],["work","Get in touch"]]]
 ];
 function vHome(){
-  var h='<div class="welcome"><h1 class="h1">Welcome to Campus Life</h1><div class="rule"></div>'
-   +'<p class="lede">The Office of Co-Curricular Activities supports 45+ student societies at LUMS \u2014 the debates, festivals, '
-   +'film nights, hackathons and service projects that make up life outside the classroom.</p></div>';
+  var h='<div class="welcome"><h1 class="h1">Supporting every society at LUMS</h1><div class="rule"></div>'
+   +'<p class="lede">The Office of Co-Curricular Activities registers and guides LUMS\u2019s 45+ student societies, approves their events, '
+   +'books campus venues and helps student leaders run everything from debates and festivals to hackathons and service projects.</p></div>';
   h+='<div class="quick"><div class="qh">Quick menu</div><div class="grid g4">'
    +AUDIENCE.map(function(g){return '<div class="qcol"><h3 class="h3">'+esc(g[0])+'</h3><ul>'
      +g[1].map(function(l){return '<li><button data-go="'+l[0]+'">'+esc(l[1])+'</button></li>'}).join("")+'</ul></div>'}).join("")+'</div></div>';
@@ -109,8 +125,8 @@ function vHome(){
      +'<span class="b"><span class="t">'+esc(e.title)+'</span><span class="d">'+esc(e.t)+' &middot; '+esc(e.venue)+'</span></span></button></li>'}).join("")+'</ul></div></div>';
   h+='<div class="sec"><div class="hd"><h2 class="h2">Recruiting now</h2><button class="link" data-go="socs">All societies</button></div><div class="grid g3">'
    +SOCIETIES.filter(function(s){return s.recruiting}).slice(0,3).map(socCard).join("")+'</div></div>';
-  h+='<div class="sec"><div class="hd"><h2 class="h2">Life at CCA</h2><button class="link" data-toast="In the live site this opens the full media gallery.">View all</button></div><div class="gallery">'
-   +GALLERY.map(function(g){return '<figure><img src="'+PIC[g.pic]+'" alt="'+esc(g.cap)+'" loading="lazy"><figcaption>'+esc(g.cap)+'</figcaption></figure>'}).join("")+'</div></div>';
+  h+='<div class="sec"><div class="hd"><h2 class="h2">Campus life in pictures</h2><button class="link" data-toast="In the live site this opens the full photo gallery.">Photo gallery</button></div><div class="gallery">'
+   +GALLERY.map(function(g){return '<button class="gfig" data-soc="'+g.soc+'"><img src="'+g.src+'" alt="'+esc(g.cap)+'" loading="lazy"><span class="gcap">'+esc(g.cap)+'</span></button>'}).join("")+'</div></div>';
   return h;
 }
 var MENU=[
@@ -142,12 +158,13 @@ function vSearch(){
 function vSocs(){
   var q=S.q.trim().toLowerCase();
   var list=SOCIETIES.filter(function(s){
-    return (S.cat==="All"||s.cat===S.cat)&&(!q||(s.name+" "+s.tag+" "+s.cat+" "+s.short).toLowerCase().indexOf(q)>=0)});
+    return (S.cat==="All"||s.cat===S.cat)&&(!S.rec||s.recruiting)&&(!q||(s.name+" "+s.tag+" "+s.cat+" "+s.short).toLowerCase().indexOf(q)>=0)});
   return '<div><div class="kick">Get involved</div><h1 class="h1">Societies &amp; Clubs</h1>'
-   +'<p class="lede">LUMS has 45+ student-led societies. '+SOCIETIES.length+' are loaded in this prototype.</p></div>'
+   +'<p class="lede">Find a society that fits you, see who is recruiting right now, and learn how to join.</p></div>'
    +'<div class="sec"><div class="search">'+ic("search")+'<input id="q" placeholder="Search societies" value="'+esc(S.q)+'" aria-label="Search societies"></div>'
    +'<div class="chips"><button class="chip" data-cat="All" aria-pressed="'+(S.cat==="All")+'">All</button>'
-   +CATS.map(function(c){return '<button class="chip" data-cat="'+esc(c)+'" aria-pressed="'+(S.cat===c)+'">'+esc(c)+'</button>'}).join("")+'</div>'
+   +CATS.map(function(c){return '<button class="chip" data-cat="'+esc(c)+'" aria-pressed="'+(S.cat===c)+'">'+esc(c)+'</button>'}).join("")
+   +'<span class="chipsep"></span><button class="chip rec" data-rec="1" aria-pressed="'+S.rec+'">Recruiting now</button></div>'
    +'<p class="small muted">'+list.length+' societ'+(list.length===1?"y":"ies")+(q?' matching \u201c'+esc(S.q)+'\u201d':'')+'</p>'
    +(list.length?'<div class="grid g3">'+list.map(socCard).join("")+'</div>':'<div class="note">Nothing matches that. Try a shorter word or clear the filters.</div>')
    +'</div>';
@@ -155,9 +172,10 @@ function vSocs(){
 function vSoc(){
   var s=soc(S.p.id),evs=EVENTS.filter(function(e){return e.soc===s.id});
   return '<div><button class="back" data-go="socs">'+ic("back")+'Societies &amp; Clubs</button></div>'
-   +'<div class="cover"><img src="'+PIC[s.pic]+'" alt=""></div>'
-   +'<div><div>'+(s.recruiting?'<span class="pill ok">Recruiting</span>':'<span class="pill grey">Applications closed</span>')+'</div>'
-   +'<h1 class="h1" style="margin-top:7px">'+esc(s.name)+'</h1><p class="lede">'+esc(s.tag)+'</p></div>'
+   +'<div class="cover">'+banner(s)+'</div>'
+   +'<div><div class="stitle">'+(s.logo?'<img class="sbadge" src="'+esc(s.logo)+'" alt="">':'')+'<h1 class="h1">'+esc(s.name)+'</h1></div>'
+   +'<div class="row" style="align-items:center;margin-top:10px">'+(s.recruiting?'<span class="pill ok">Recruiting</span>':'<span class="pill grey">Applications closed</span>')
+   +'<span class="pill">'+esc(s.cat)+'</span></div><p class="lede">'+esc(s.tag)+'</p></div>'
    +'<div class="sec"><div class="hd"><h2 class="h2">About</h2></div><p>'+esc(s.about)+'</p></div>'
    +'<div class="sec"><div class="hd"><h2 class="h2">How to join</h2></div>'
    +(s.recruiting?'<div class="note ok"><b>Applications are open.</b> Apply by '+esc(s.deadline)+'.</div><div class="row"><button class="btn gold" data-toast="In the live site this opens the society\u2019s application form.">Apply to join '+ic("arrow")+'</button></div>'
@@ -173,11 +191,11 @@ function vEvents(){
    +'<div class="sec"><div class="chips"><button class="chip" data-tab="upcoming" aria-pressed="'+up+'">Upcoming</button>'
    +'<button class="chip" data-tab="past" aria-pressed="'+(!up)+'">Past events</button></div>';
   if(up){
-    h+='<p class="small muted">'+list.length+' approved events. Each came from a society request and went live the moment CCA approved it.</p>';
+    h+='<p class="small muted">'+list.length+' upcoming events, all approved by CCA.</p>';
     var day="";
     for(var i=0;i<list.length;i++){ if(list[i].d!==day){day=list[i].d;h+='<p class="kick" style="margin-top:9px">'+esc(fmtD(day))+'</p>'} h+=evCard(list[i]) }
   }else{
-    h+='<p class="small muted">Past events keep their page, so recaps and photos stay findable.</p>';
+    h+='<p class="small muted">Recaps and photos from recent events.</p>';
     h+=list.map(function(p){return '<div class="card"><span class="row" style="justify-content:space-between"><span class="t">'+esc(p.title)+'</span><span class="pill grey">Recap</span></span>'
       +'<span class="d">'+esc(soc(p.soc).name)+' &middot; '+esc(fmtD(p.d))+' &middot; '+esc(p.venue)+'</span></div>'}).join("");
   }
@@ -188,7 +206,7 @@ function vEvent(){
   if(!e)return '<p>Event not found.</p>';
   var s=soc(e.soc);
   return '<div><button class="back" data-go="events">'+ic("back")+'Events Calendar</button></div>'
-   +'<div class="cover" style="height:190px"><img src="'+PIC[e.pic]+'" alt=""></div>'
+   +'<div class="cover" style="height:190px">'+banner(s)+'</div>'
    +'<div><span class="pill gold">'+esc(e.open)+'</span><h1 class="h1" style="margin-top:8px">'+esc(e.title)+'</h1>'
    +'<button class="link" data-soc="'+s.id+'">'+esc(s.name)+' &rsaquo;</button></div>'
    +'<div class="sec"><dl class="kv"><dt>'+ic("cal")+'</dt><dd>'+esc(fmtD(e.d))+'<br><span class="small muted" style="font-weight:400">'+esc(e.t)+'</span></dd>'
@@ -198,20 +216,20 @@ function vEvent(){
    +'<div class="sec"><div class="hd"><h2 class="h2">About this event</h2></div><p>'+esc(e.blurb)+'</p></div>';
 }
 function vAbout(){
-  var rows=[["Event approvals and the calendar","Programme Development","5 working days"],["Venue and auditorium bookings","Operations","3 working days"],
-   ["PR, screens and the student mailer","Communications","2 working days"],["Sponsorship and NOCs","Programme Development + Finance","5 working days"]];
+  var rows=[["Event approvals and the calendar","Programme Development"],["Venue bookings (HSS A1\u2013A15)","Operations"],
+   ["PR, screens and the student mailer","Communications"],["Sponsorship and NOCs","Programme Development + Finance"],["Anything else","CCA front desk"]];
   return '<div><div class="kick">About</div><h1 class="h1">The Office of Co-Curricular Activities</h1>'
    +'<p class="lede">CCA supports 45+ student societies at LUMS: approving events, booking venues, clearing sponsorships and running the campus calendar.</p></div>'
    +'<div class="sec"><div class="hd"><h2 class="h2">Who handles what</h2></div><div class="tablewrap"><table><thead><tr><th>Area</th><th>Goes to</th><th>Usual reply</th></tr></thead><tbody>'
-   +rows.map(function(r){return '<tr><td><b>'+r[0]+'</b></td><td>'+r[1]+'</td><td class="muted">'+r[2]+'</td></tr>'}).join("")
-   +'</tbody></table></div><div class="note"><b>Every one of those arrives by email today.</b> The portal keeps the email but adds a status, a reference and a record that survives the council handover.</div></div>';
+   +rows.map(function(r){return '<tr><td><b>'+r[0]+'</b></td><td>'+r[1]+'</td><td class="muted">1 working day</td></tr>'}).join("")
+   +'</tbody></table></div><div class="note"><b>Societies send requests through the society portal.</b> Each one gets a reference number and a live status, and CCA replies within one working day.</div></div>';
 }
 function vResources(){
   var rows=[["Society Handbook 2026\u201327","Policy","12 Jan 2027"],["Society Constitution template","Template","4 Sep 2026"],
    ["Event proposal guidelines","Policy","20 Oct 2026"],["Venue booking rules","Policy","3 Nov 2026"],
    ["Sponsorship and NOC policy","Policy","18 Dec 2026"],["Post-event report form","Template","12 Jan 2027"]];
   return '<div><div class="kick">Resources</div><h1 class="h1">Policies and forms</h1>'
-   +'<p class="lede">One page per policy, each with the date it last changed. The FAQ links here instead of repeating the rules.</p></div>'
+   +'<p class="lede">Every policy and template societies need, with the date each one last changed.</p></div>'
    +'<div class="sec"><div class="tablewrap"><table><thead><tr><th>Document</th><th>Type</th><th>Last updated</th></tr></thead><tbody>'
    +rows.map(function(r){return '<tr><td><b>'+r[0]+'</b></td><td><span class="pill grey">'+r[1]+'</span></td><td class="muted">'+r[2]+'</td></tr>'}).join("")
    +'</tbody></table></div></div>';
@@ -223,7 +241,6 @@ function vWork(){
    +'<div class="card"><span class="t">Sponsor an event</span><span class="d">Title, gold and stall packages across flagship events.</span></div>'
    +'<div class="card"><span class="t">Recruit on campus</span><span class="d">Career sessions, stalls and society partnerships.</span></div>'
    +'<div class="card"><span class="t">Run a workshop</span><span class="d">Skills sessions co-hosted with a relevant society.</span></div></div>'
-   +'<div class="note"><b>This section is new.</b> Your call mentions collaboration opportunities, and right now a sponsor has nowhere to start. The enquiry form feeds the same request inbox staff already use.</div>'
    +'<div class="row"><button class="btn gold" data-toast="The enquiry form feeds the CCA request inbox.">Start an enquiry '+ic("arrow")+'</button></div></div>';
 }
 
@@ -250,8 +267,8 @@ function vDash(){
   var s=soc(S.soc),m=mineReqs();
   var open=m.filter(function(r){return r.status==="submitted"||r.status==="review"||r.status==="changes"}).length;
   var act=m.filter(function(r){return r.status==="changes"});
-  var h='<div class="row" style="align-items:center;gap:13px;flex-wrap:nowrap"><span class="avatar" style="width:52px;height:52px;font-size:14px">'+esc(s.short)+'</span>'
-   +'<span><span class="h2" style="font-family:var(--disp);font-weight:700;color:var(--head);display:block">'+esc(s.name)+'</span><span class="small muted">Signed in as a society executive</span></span></div>'
+  var h='<div class="dhead">'+(s.logo?'<img class="sbadge" src="'+esc(s.logo)+'" alt="">':'<span class="avatar" style="width:56px;height:56px;font-size:14px">'+esc(s.short)+'</span>')
+   +'<span><span class="kick">Society dashboard</span><span class="h1" style="display:block;font-size:clamp(22px,3vw,30px)">'+esc(s.name)+'</span></span></div>'
    +'<div class="grid g4">'+tile(open,"Open requests")+tile(EVENTS.filter(function(e){return e.soc===s.id}).length,"Events on the website")
    +tile(act.length,"Need your attention")+tile(s.recruiting?"Open":"Closed","Applications")+'</div>';
   if(act.length)h+='<div class="note warn"><b>CCA has asked for changes on '+esc(act[0].ref)+'.</b> '+esc(act[0].note||"")+' <button class="link" data-req="'+act[0].ref+'">Open the request</button></div>';
@@ -262,12 +279,52 @@ function vDash(){
 }
 function vNew(){
   return '<div><div class="kick">Society portal</div><h1 class="h1">Start a request</h1>'
-   +'<p class="lede">Six things societies currently email CCA about. Each becomes a tracked request with a reference number \u2014 and CCA still gets the email.</p></div>'
+   +'<p class="lede">Pick what you need. Every request gets a reference number and a live status, and CCA replies within one working day.</p></div>'
    +'<div class="sec"><div class="grid g2">'+REQ_TYPES.map(typeCard).join("")+'</div>'
    +'<div class="note"><b>Why not just email?</b> An email has no status, no reference, and no record once the sender graduates. A request has all three, and CCA still receives a copy in Outlook for anyone who prefers working there.</div></div>';
 }
-function clashes(v,d,f,t){if(!v||!d||!f||!t)return [];return BOOKINGS.filter(function(b){return b.venue===v&&b.d===d&&!(t<=b.from||f>=b.to)})}
-function fi(l,k,t,v){return '<label class="f">'+esc(l)+'<input data-d="'+k+'" type="'+t+'" value="'+esc(v||"")+'"></label>'}
+function clashes(v,d,f,t,skip){if(!v||!d||!f||!t)return [];return BOOKINGS.filter(function(b){return b.venue===v&&b.d===d&&(!skip||b.ref!==skip)&&!(t<=b.from||f>=b.to)})}
+function toMin(t){var p=String(t||"").split(":");return p.length<2?NaN:(+p[0])*60+(+p[1])}
+function roomStatus(v,d){
+  var att=+d.att||0,cl=clashes(v.id,d.date,d.from,d.to);
+  if(cl.length)return {ok:false,why:"Booked "+cl[0].from+"\u2013"+cl[0].to+" \u00b7 "+cl[0].by};
+  if(att>v.cap)return {ok:false,why:"Seats "+v.cap+" \u00b7 too small for "+att};
+  return {ok:true};
+}
+function venueCard(v,att,st,best,sel){
+  var pct=Math.min(100,Math.round(att/v.cap*100));
+  return '<button type="button" class="vcard'+(sel?' sel':'')+'"'+(st.ok?' data-vpick="'+v.id+'" aria-pressed="'+!!sel+'"':' disabled')+'>'
+   +'<span class="vtop"><span class="vname">'+esc(v.name)+'</span>'
+   +(st.ok?'<span class="pill ok">'+(best?'Best fit':'Available')+'</span>':'<span class="pill grey">Unavailable</span>')+'</span>'
+   +'<span class="vmeta">Seats '+v.cap+' \u00b7 '+esc(v.notes)+'</span>'
+   +'<span class="vbar'+(!st.ok&&att>v.cap?' over':'')+'"><span style="width:'+pct+'%"></span></span>'
+   +'<span class="vwhy">'+(st.ok?(sel?ic("check")+'Selected':pct+'% full with '+att+' people'):esc(st.why))+'</span></button>';
+}
+/* Rooms appear only once date, time and headcount are known. Free rooms that fit are pickable (smallest fit first);
+   booked or too-small rooms stay visible with the reason, but cannot be chosen. */
+function venuePicker(d){
+  var att=+d.att||0,bad=d.from&&d.to&&!(toMin(d.to)>toMin(d.from));
+  if(!d.date||!(att>0)||!d.from||!d.to||bad){
+    var miss=[];if(!d.date)miss.push("date");if(!d.from||!d.to)miss.push("time");if(!(att>0))miss.push("expected attendance");
+    return '<div class="vlock">'+ic("lock")+'<span><b>'+(bad?'The end time has to be after the start time.':'Choose your '+miss.join(", ").replace(/, ([^,]*)$/," and $1")+' first.')+'</b>'
+      +'<br>Rooms that are free and big enough will appear here.</span></div>';
+  }
+  var ok=[],no=[];
+  VENUES.forEach(function(v){var st=roomStatus(v,d);(st.ok?ok:no).push({v:v,st:st})});
+  ok.sort(function(x,y){return x.v.cap-y.v.cap});
+  if(d.venue&&!ok.some(function(r){return r.v.id===d.venue}))delete d.venue;
+  var h='<div class="vhead"><span class="vcount"><b>'+ok.length+'</b> of '+VENUES.length+' rooms available</span><span class="muted">'+esc(fmtD(d.date))+' \u00b7 '+esc(d.from)+'\u2013'+esc(d.to)+' \u00b7 '+att+' people</span></div>';
+  h+=ok.length?'<div class="vgrid">'+ok.map(function(r,i){return venueCard(r.v,att,r.st,i===0,d.venue===r.v.id)}).join("")+'</div>'
+    :'<div class="note warn"><b>No HSS room fits that slot.</b> Try another time or date, or send an Other request and CCA will help.</div>';
+  if(no.length)h+='<div class="vsub">Not available for this slot</div><div class="vgrid">'+no.map(function(r){return venueCard(r.v,att,r.st,false,false)}).join("")+'</div>';
+  return h;
+}
+function slotFields(d){if(d.from==null)d.from="18:00";if(d.to==null)d.to="21:00";
+  return '<div class="fstep"><span class="sn">1</span><b>When, and how many people?</b></div>'
+   +'<div class="grid g4">'+fi("Date","date","date",d.date||"")+fi("From","from","time",d.from)+fi("To","to","time",d.to)+fi("Expected attendance","att","number",d.att||"")+'</div>'
+   +'<div class="fstep"><span class="sn">2</span><b>Preferred venue</b><span class="small muted">HSS rooms A1\u2013A15</span></div><div id="vpick">'+venuePicker(d)+'</div>';
+}
+function fi(l,k,t,v){return '<label class="f">'+esc(l)+'<input data-d="'+k+'" type="'+t+'"'+(t==="number"?' min="1" inputmode="numeric"':'')+' value="'+esc(v||"")+'"></label>'}
 function ta(l,v){return '<label class="f">'+esc(l)+'<textarea data-d="body" placeholder="A few lines is enough">'+esc(v||"")+'</textarea></label>'}
 function checks(items,d){var sel=d.checks||[];return items.map(function(it){var on=sel.indexOf(it)>=0;
   return '<label class="check'+(on?" on":"")+'"><input type="checkbox" data-c="'+esc(it)+'"'+(on?" checked":"")+'>'+esc(it)+'</label>'}).join("")}
@@ -277,15 +334,9 @@ function vForm(){
    +'<div class="kick" style="margin-top:7px">'+esc(soc(S.soc).name)+'</div><h1 class="h1">'+esc(t.name)+'</h1>'
    +'<p class="lede">'+esc(t.blurb)+' CCA usually replies within '+esc(t.sla)+'.</p></div><div class="sec">';
   if(t.id==="venue"){
-    h+='<div class="grid g2"><label class="f">Venue<select data-d="venue"><option value="">Choose a venue</option>'
-     +VENUES.map(function(v){return '<option value="'+v.id+'"'+(d.venue===v.id?' selected':'')+'>'+esc(v.name)+' \u2014 seats '+v.cap+'</option>'}).join("")+'</select></label>'
-     +fi("Date","date","date",d.date||"2027-02-18")+fi("From","from","time",d.from||"18:00")+fi("To","to","time",d.to||"21:00")
-     +fi("Expected attendance","att","number",d.att||"200")+'</div>'
+    h+=slotFields(d)
      +'<label class="f">Setup needed<span class="checks">'+checks(["AV and projector","Microphones","Stage","Extra seating","Registration desk"],d)+'</span></label>'
      +ta("What is the booking for",d.body);
-    if(d.venue){var cl=clashes(d.venue,d.date||"2027-02-18",d.from||"18:00",d.to||"21:00");
-      h+=cl.length?'<div class="note bad"><b>'+esc(venue(d.venue).name)+' is already booked then.</b> '+esc(cl[0].by)+' holds it '+esc(cl[0].from)+'\u2013'+esc(cl[0].to)+' for '+esc(cl[0].what)+'. Pick another time or venue, or send it anyway and CCA will decide.</div>'
-        :'<div class="note ok"><b>'+esc(venue(d.venue).name)+' is free then.</b> Seats '+venue(d.venue).cap+'. '+esc(venue(d.venue).notes)+'.</div>'}
   }else if(t.id==="pr"){
     h+='<label class="f">Where should this go<span class="checks">'+checks(["CCA Instagram","Student mailer","Campus screens","Notice boards","CCA website banner"],d)+'</span></label>'
      +'<div class="grid g2">'+fi("Publish on","date","date",d.date||"2027-02-15")+fi("Event date","date2","date",d.date2||"2027-02-22")+'</div>'
@@ -294,9 +345,7 @@ function vForm(){
   }else if(t.id==="event"){
     h+='<div class="grid g2">'+fi("Event title","title","text",d.title||"")
      +'<label class="f">Category<select data-d="cat">'+CATS.map(function(c){return '<option'+(d.cat===c?' selected':'')+'>'+esc(c)+'</option>'}).join("")+'</select></label>'
-     +fi("Date","date","date",d.date||"2027-03-05")+fi("Start time","from","time",d.from||"18:00")
-     +'<label class="f">Venue<select data-d="venue"><option value="">Choose a venue</option>'+VENUES.map(function(v){return '<option value="'+v.id+'"'+(d.venue===v.id?' selected':'')+'>'+esc(v.name)+'</option>'}).join("")+'</select></label>'
-     +fi("Expected attendance","att","number",d.att||"120")+'</div>'+ta("Describe the event",d.body)
+     +'</div>'+slotFields(d)+ta("Describe the event",d.body)
      +'<div class="note"><b>Approve once, publish everywhere.</b> When CCA approves this, the event appears on the website, on your society page and in the campus calendar. Nothing is retyped.</div>';
   }else if(t.id==="logistics"){
     h+='<label class="f">What do you need<span class="checks">'+checks(["Chairs","Tables","Sound system","Projector","Standees","Extension cables","Water coolers"],d)+'</span></label>'
@@ -309,6 +358,9 @@ function vForm(){
      +fi("Amount (PKR)","att","text",d.att||"")+fi("Society contact","place","text",d.place||"")+'</div>'
      +ta("What is being offered, and what does the sponsor get",d.body)
      +'<div class="note warn"><b>Finance rules apply.</b> A sponsorship over PKR 500,000 also needs the Treasurer\u2019s sign-off. The portal routes it automatically.</div>';
+  }else if(t.id==="other"){
+    h+='<div class="grid g2">'+fi("Subject","title","text",d.title||"")+fi("Related date (optional)","date","date",d.date||"")+'</div>'
+     +ta("What do you need from CCA?",d.body);
   }else{
     var s2=soc(S.soc);
     h+=ta("About the society",d.body||s2.about)
@@ -322,17 +374,21 @@ function vForm(){
 }
 function submitReq(){
   var t=rtype(S.p.type),d=S.draft,s=soc(S.soc);
+  if(t.id==="venue"&&!d.venue){toast("Enter the date, time and attendance, then pick an available room.");var vp=$("#vpick");if(vp)vp.scrollIntoView({behavior:"smooth",block:"center"});return}
+  if(t.id==="other"&&!(d.title||d.body)){toast("Add a subject or a few lines about what you need.");return}
   seq++;
-  var ref="CCA-"+{venue:"AUD",pr:"PR",event:"EVT",logistics:"LOG",noc:"NOC",profile:"PRF"}[t.id]+"-0"+seq;
+  var ref="CCA-"+{venue:"VEN",pr:"PR",event:"EVT",logistics:"LOG",noc:"NOC",profile:"PRF",other:"OTH"}[t.id]+"-0"+seq;
   var f={};
-  if(t.id==="venue")f={Venue:(venue(d.venue)||{name:"Not chosen"}).name,Date:d.date||"18 February 2027",From:d.from||"18:00",To:d.to||"21:00",Attendance:d.att||"200",Setup:(d.checks||[]).join(", ")||"None"};
+  var slot=(t.id==="venue"||t.id==="event")&&d.date?{v:d.venue||"",d:d.date,from:d.from,to:d.to,att:+d.att||0}:null;
+  if(t.id==="venue")f={Venue:venue(d.venue).name,Date:fmtD(d.date),Time:d.from+"\u2013"+d.to,Attendance:d.att,Setup:(d.checks||[]).join(", ")||"None"};
   else if(t.id==="pr")f={Channels:(d.checks||[]).join(", ")||"None chosen","Publish on":d.date||"15 February 2027","Event date":d.date2||"22 February 2027"};
-  else if(t.id==="event")f={Title:d.title||"Untitled event",Category:d.cat||"Academic",Date:d.date||"2027-03-05",Time:d.from||"18:00",Venue:(venue(d.venue)||{name:"To be confirmed"}).name,Attendance:d.att||"120"};
+  else if(t.id==="event")f={Title:d.title||"Untitled event",Category:d.cat||"Academic",Date:d.date?fmtD(d.date):"To be confirmed",Time:d.from&&d.to?d.from+"\u2013"+d.to:"To be confirmed",Venue:(venue(d.venue)||{name:"To be confirmed"}).name,Attendance:d.att||"Not given"};
   else if(t.id==="logistics")f={Items:(d.checks||[]).join(", ")||"None","Deliver on":d.date||"20 February 2027","Deliver by":d.from||"15:00","Drop-off":d.place||"Not given"};
   else if(t.id==="noc")f={Company:d.title||"Not given",Package:d.cat||"Gold",Amount:d.att||"Not given",Contact:d.place||"Not given"};
+  else if(t.id==="other")f={Subject:d.title||"Not given","Related date":d.date?fmtD(d.date):"None"};
   else f={"How to join":d.title||"",Email:d.place||"",Instagram:d.att||""};
   var title=d.title||(t.id==="venue"?((venue(d.venue)||{name:"Venue"}).name+" booking"):t.name);
-  REQUESTS.unshift({ref:ref,type:t.id,soc:S.soc,title:title,status:"submitted",created:"2027-02-14",fields:f,body:d.body||"",
+  REQUESTS.unshift({ref:ref,type:t.id,soc:S.soc,title:title,status:"submitted",created:"2027-02-14",fields:f,slot:slot,body:d.body||"",
     trail:[["Submitted by you ("+s.short+")","just now"],["Emailed to CCA and "+s.email,"just now"]],published:false});
   sendMail("cca@lums.edu.pk",s.email,"["+ref+"] New "+t.name.toLowerCase()+" \u2014 "+title,
     "A new request was submitted through the CCA website by "+s.name+". Open the request to approve, ask for changes or decline.");
@@ -358,11 +414,14 @@ function vReq(staff){
   var st=STATUS[r.status],s=soc(r.soc);
   var h='<div><button class="back" data-go="'+(staff?"inbox":"mine")+'">'+ic("back")+(staff?"Request Inbox":"My requests")+'</button>'
    +'<div class="row" style="justify-content:space-between;align-items:baseline;margin-top:7px"><span class="mono muted">'+esc(r.ref)+'</span><span class="pill '+st.cls+'">'+esc(st.label)+'</span></div>'
-   +'<h1 class="h1">'+esc(r.title)+'</h1><p class="lede">'+esc(rtype(r.type).name)+' &middot; '+esc(s.name)+'</p></div>'
+   +'<h1 class="h1">'+esc(r.title)+'</h1><p class="lede">'+esc(rtype(r.type).name)+' &middot; '+esc(s.name)+'</p>'+track(r)+'</div>'
    +'<div class="sec"><div class="hd"><h3 class="h3">Details</h3></div><dl class="kv">';
   for(var k in r.fields)if(r.fields.hasOwnProperty(k))h+='<dt>'+esc(k)+'</dt><dd>'+esc(r.fields[k])+'</dd>';
   h+='</dl>'+(r.body?'<p class="small">'+esc(r.body)+'</p>':'')+'</div>';
-  if(staff&&r.type==="venue"&&r.status!=="approved")h+='<div class="sec"><div class="hd"><h3 class="h3">Venue check</h3></div><div class="note ok"><b>No clash found.</b> The venue is free for the time requested.</div></div>';
+  if(staff&&r.slot&&r.slot.v&&r.status!=="approved"){var vv=venue(r.slot.v),cl=clashes(r.slot.v,r.slot.d,r.slot.from,r.slot.to,r.ref);
+    h+='<div class="sec"><div class="hd"><h3 class="h3">Venue check</h3></div>'+(cl.length?'<div class="note bad"><b>'+esc(vv.name)+' is now taken.</b> '+esc(cl[0].by)+' holds it '+esc(cl[0].from)+'\u2013'+esc(cl[0].to)+'.</div>'
+      :r.slot.att>vv.cap?'<div class="note warn"><b>'+esc(vv.name)+' seats '+vv.cap+'.</b> The society expects '+r.slot.att+'.</div>'
+      :'<div class="note ok"><b>'+esc(vv.name)+' is still free.</b> No clash for '+esc(r.slot.from)+'\u2013'+esc(r.slot.to)+', and it seats '+vv.cap+'.</div>')+'</div>'}
   if(r.note&&!staff)h+='<div class="note warn"><b>CCA asked for changes.</b> '+esc(r.note)+'</div>';
   h+='<div class="sec"><div class="hd"><h3 class="h3">History</h3></div><ul class="steps">'
    +r.trail.map(function(t,i){return '<li><span class="dot '+(i===r.trail.length-1?"now":"done")+'"></span><span class="txt"><b>'+esc(t[0])+'</b><span>'+esc(t[1])+'</span></span></li>'}).join("")+'</ul></div>';
@@ -382,6 +441,10 @@ function vReq(staff){
   }
   return h;
 }
+function track(r){
+  var at={submitted:0,review:1,changes:1,approved:2,declined:2,done:2}[r.status]||0,lab=["Submitted","In review",r.status==="declined"?"Declined":r.status==="approved"||r.status==="done"?"Approved":"Decision"];
+  return '<div class="track" aria-label="Progress">'+lab.map(function(l,i){return '<span class="st'+(i<=at?' done':'')+(i===at?' now':'')+(r.status==="declined"&&i===2?' bad':'')+'">'+l+'</span>'}).join("")+'</div>';
+}
 function vInbox(){
   var f=S.inbox;
   var list=REQUESTS.filter(function(r){return f==="all"?true:(f==="open"?(r.status==="submitted"||r.status==="review"||r.status==="changes"):r.type===f)});
@@ -400,7 +463,7 @@ function vCal(){
    +'<p class="lede">Who holds which space, and when. The booking form checks this before a society can double-book the auditorium.</p></div>'
    +'<div class="sec"><div class="tablewrap"><table><thead><tr><th>Venue</th><th>Date</th><th>Time</th><th>Society</th><th>Event</th></tr></thead><tbody>'
    +BOOKINGS.map(function(b){return '<tr><td><b>'+esc(venue(b.venue).name)+'</b></td><td class="tnum">'+esc(fmtD(b.d))+'</td><td class="tnum">'+esc(b.from)+'\u2013'+esc(b.to)+'</td><td>'+esc(b.by)+'</td><td class="muted">'+esc(b.what)+'</td></tr>'}).join("")
-   +'</tbody></table></div><div class="note"><b>Capacity is checked too.</b> If a society books Room 101 for 300 people, the form says so before it reaches you.</div></div>';
+   +'</tbody></table></div><div class="note"><b>Capacity is checked too.</b> A society asking for 200 people never sees a 60-seat room as an option, so impossible requests don\u2019t reach you.</div></div>';
 }
 function vPubQ(){
   return '<div><div class="kick">CCA staff</div><h1 class="h1">Website queue</h1>'
@@ -413,12 +476,13 @@ function decide(ref,act){
   var r=reqByRef(ref);if(!r)return;var s=soc(r.soc);
   if(act==="approve"){
     r.status="approved";r.trail.push(["Approved by Ayesha Arshad (CCA)","just now"]);
+    if(r.slot&&r.slot.v)BOOKINGS.push({ref:r.ref,venue:r.slot.v,d:r.slot.d,from:r.slot.from,to:r.slot.to,by:s.name,what:r.title});
     var pub=$("#pubToggle");
     if(r.type==="event"&&(!pub||pub.checked)){
       r.published=true;r.trail.push(["Published to the website","just now"]);
-      EVENTS.push({id:"n"+r.ref,soc:r.soc,title:r.fields.Title||r.title,d:/^\d{4}-/.test(r.fields.Date||"")?r.fields.Date:"2027-03-05",
-        t:r.fields.Time||"6:00 PM",venue:r.fields.Venue||"To be confirmed",cat:r.fields.Category||"Academic",open:"Open to all",
-        pic:Math.floor(Math.random()*PIC.length),blurb:r.body||"Details to follow."});
+      EVENTS.push({id:"n"+r.ref,soc:r.soc,title:r.fields.Title||r.title,d:r.slot&&r.slot.d?r.slot.d:"2027-03-05",
+        t:r.fields.Time||"To be confirmed",venue:r.fields.Venue||"To be confirmed",cat:r.fields.Category||"Academic",open:"Open to all",
+        blurb:r.body||"Details to follow."});
       toast("Approved \u2014 and it is now live on the public Events page");
     }else toast("Approved \u2014 "+s.short+" has been emailed");
     sendMail(s.email,"cca@lums.edu.pk","["+r.ref+"] Approved \u2014 "+r.title,"Your request has been approved by CCA."+(r.published?" The event is now live on the website.":""));
@@ -440,9 +504,9 @@ function vGuide(){
    +'<div class="row" style="justify-content:space-between;align-items:center"><h2 class="h2">Demo guide</h2><button class="btn plain sm" data-close="1">Close</button></div>'
    +'<p class="small muted">A four-minute path through the prototype. The three buttons in the black bar switch roles.</p>'
    +'<ul class="steps" style="margin-top:14px">'
-   +gstep("1 \u00b7 Open as a student","Public site \u2192 Societies & Clubs. Type \u201cdeb\u201d and watch the list filter as you type. Open LUMS Debating Society, then its event.")
-   +gstep("2 \u00b7 Switch to a society executive","Society portal \u2192 sign in as LUMS Debating Society. Point at the dashboard: open requests, and one that needs attention.")
-   +gstep("3 \u00b7 Book the auditorium","Start a Request \u2192 Auditorium or venue booking. Main Auditorium, 18 February, 6\u20139 PM. The clash with LUMUN appears before they can submit.")
+   +gstep("1 \u00b7 Open as a student","Public site \u2192 Societies & Clubs. Type \u201cdeb\u201d and watch the list filter as you type. Open Debates and Recitation at LUMS (DRUMS), then its event.")
+   +gstep("2 \u00b7 Switch to a society executive","Society portal \u2192 sign in as DRUMS. Point at the dashboard: open requests, and one that needs attention.")
+   +gstep("3 \u00b7 Book a room","Start a Request \u2192 Venue booking. Enter 18 February, 6\u20139 PM, 120 people. HSS A1 shows as booked by LUMUN and can\u2019t be picked; the free rooms that fit are listed first.")
    +gstep("4 \u00b7 Submit an event proposal","Start a Request \u2192 Event proposal. Fill it in and submit. Note the reference number and the two emails that go out.")
    +gstep("5 \u00b7 Approve it as CCA","CCA staff \u2192 Request Inbox. Open the new request and approve. Say the line: approve once, publish everywhere.")
    +gstep("6 \u00b7 Show it live","Public site \u2192 Events Calendar. The event is on the calendar. Then open the email trail to show nothing left Outlook behind.")
@@ -477,13 +541,31 @@ function render(){
   if(S.sheet==="search")document.body.insertAdjacentHTML("beforeend",vSearch());
   $("#menuBtn").setAttribute("aria-expanded",S.sheet==="menu");
   var q=S.sheet==="search"?$("#gq"):$("#q");if(q){q.focus();q.setSelectionRange(q.value.length,q.value.length)}
+  enhance();autoplay();
+}
+var lastView="",io=null;
+/* Sections ease in once per page view (not on every keystroke); numbers count up when they scroll into view. */
+function enhance(){
+  var key=S.mode+"|"+S.view+"|"+JSON.stringify(S.p),fresh=key!==lastView;lastView=key;
+  if(RM||!("IntersectionObserver" in window))return;
+  if(io)io.disconnect();
+  io=new IntersectionObserver(function(es){es.forEach(function(en){if(!en.isIntersecting)return;en.target.classList.add("in");io.unobserve(en.target);
+    if(en.target.classList.contains("stats"))countUp(en.target)})},{rootMargin:"0px 0px -6% 0px"});
+  var els=document.querySelectorAll("#page > *, #stats > .stats");
+  for(var i=0;i<els.length;i++){els[i].classList.add("rv");if(fresh)io.observe(els[i]);else els[i].classList.add("in")}
+}
+function countUp(root){
+  var ns=root.querySelectorAll("[data-to]");
+  for(var i=0;i<ns.length;i++)(function(el){var to=+el.getAttribute("data-to"),suf=el.getAttribute("data-suf"),t0=null;
+    function step(ts){if(!t0)t0=ts;var p=Math.min(1,(ts-t0)/1300),e=1-Math.pow(1-p,3);el.textContent=Math.round(to*e).toLocaleString("en-US")+suf;if(p<1)requestAnimationFrame(step)}
+    requestAnimationFrame(step)})(ns[i]);
 }
 document.addEventListener("input",function(e){
   var t=e.target;
   if(t.id==="q"){S.q=t.value;render();return}
   if(t.id==="gq"){S.gq=t.value;$("#gqr").innerHTML=searchResults();return}
   if(t.hasAttribute&&t.hasAttribute("data-d")){S.draft[t.getAttribute("data-d")]=t.value;
-    if(S.view==="form"&&S.p.type==="venue")render();}
+    if(S.view==="form"&&/^(date|from|to|att)$/.test(t.getAttribute("data-d"))){var vp=$("#vpick");if(vp)vp.innerHTML=venuePicker(S.draft)}}
 });
 document.addEventListener("change",function(e){
   var t=e.target;
@@ -498,7 +580,7 @@ document.addEventListener("keydown",function(e){if(e.key==="Escape"){togglePmenu
 function togglePmenu(force){var m=$("#pmenu"),b=$("#portalBtn");var open=force!=null?force:m.hidden;m.hidden=!open;b.setAttribute("aria-expanded",open)}
 document.addEventListener("click",function(e){
   if(!e.target.closest("#portalBtn")&&$("#pmenu"))togglePmenu(false);
-  var t=e.target.closest("[data-mode],[data-go],[data-soc],[data-ev],[data-cat],[data-tab],[data-type],[data-req],[data-act],[data-inbox],[data-jump],[data-toast],[data-close],[data-slide],[data-pub],#signin,#submitReq,#guideBtn,#mailBtn,#themeBtn,#menuBtn,#searchBtn,#portalBtn,.sheet,.overlay");
+  var t=e.target.closest("[data-mode],[data-go],[data-soc],[data-ev],[data-cat],[data-tab],[data-type],[data-req],[data-act],[data-inbox],[data-jump],[data-toast],[data-close],[data-slide],[data-pub],#signin,#submitReq,#guideBtn,#mailBtn,#themeBtn,#menuBtn,#searchBtn,#portalBtn,[data-vpick],[data-rec],.sheet,.overlay");
   if(!t)return;
   var a=function(n){return t.getAttribute(n)};
   if((t.classList.contains("sheet")||t.classList.contains("overlay"))&&e.target===t){S.sheet=false;render();return}
@@ -506,7 +588,11 @@ document.addEventListener("click",function(e){
   if(t.id==="portalBtn"){togglePmenu();return}
   if(t.id==="menuBtn"){S.sheet=S.sheet==="menu"?false:"menu";render();return}
   if(t.id==="searchBtn"){S.sheet=S.sheet==="search"?false:"search";render();return}
-  if(a("data-slide")){var v=a("data-slide");setSlide(v==="prev"?S.slide-1:v==="next"?S.slide+1:+v);return}
+  if(a("data-slide")){var v=a("data-slide");
+    if(v==="toggle"){S.paused=!S.paused;var sl=$(".slider");sl.classList.toggle("paused",S.paused);t.setAttribute("aria-label",S.paused?"Play slideshow":"Pause slideshow");t.innerHTML=ic(S.paused?"play":"pause");setSlide(S.slide);return}
+    setSlide(v==="prev"?S.slide-1:v==="next"?S.slide+1:+v);return}
+  if(a("data-vpick")){S.draft.venue=a("data-vpick");$("#vpick").innerHTML=venuePicker(S.draft);return}
+  if(a("data-rec")){S.rec=!S.rec;render();return}
   if(a("data-pub")){S.mode="public";go(a("data-pub"));return}
   if(a("data-close")){S.sheet=false;render();return}
   if(t.id==="guideBtn"){S.sheet=S.sheet==="guide"?false:"guide";render();return}

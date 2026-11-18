@@ -28,7 +28,7 @@ This repo is the prototype we demo. It is **not** the final product. The real bu
 
 So the product has two halves that are one idea:
 
-- **Inward** — societies sign in and send CCA a request. Six types: venue booking, PR, event proposal, equipment/logistics, sponsorship/NOC, profile update. Each gets a reference (`CCA-AUD-0413`) and a live status.
+- **Inward** — societies sign in and send CCA a request. Seven types: venue booking, PR, event proposal, equipment/logistics, sponsorship/NOC, profile update, other. Each gets a reference (`CCA-VEN-0413`), a live status, and a one-working-day reply target.
 - **Outward** — the public site is a *byproduct* of those decisions. CCA approves an event once and it appears on the calendar, the society page and the homepage automatically.
 
 The pitch line: **"Approve once, publish everywhere."**
@@ -36,7 +36,7 @@ The pitch line: **"Approve once, publish everywhere."**
 The objection-killer: **email does not go away.** Every request and decision still emails `cca@lums.edu.pk` and the society with the reference attached. The portal gives that correspondence a spine; it doesn't replace Outlook.
 
 Two demo moments carry the whole pitch:
-1. **The clash check** — booking Main Auditorium on 18 Feb, 6–9 PM surfaces LUMUN's existing 17:00–21:00 hold *before* submission. Email cannot do that.
+1. **The availability check** — a venue booking asks for date, time and headcount first, then lists HSS A1–A15. Free rooms that fit are pickable (smallest fit first); booked or too-small rooms stay visible but disabled with the reason. 18 Feb, 6–9 PM, 120 people shows A1 held by LUMUN 17:00–21:00. Room capacities in `VENUES` are placeholders until CCA confirms them.
 2. **Approve once, publish everywhere** — submit an event in the portal, approve it as staff, switch to the public Events Calendar, it's there.
 
 ## What we found in the audit (the evidence base)
