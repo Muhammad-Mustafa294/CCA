@@ -63,6 +63,16 @@ var SOCIETIES=[
   council:[["Sara Qureshi","President"],["Abdullah Riaz","Vice President"],["Mishal Ahsan","Editor"],["Zain Abbas","Treasurer"]],
   email:"literary@lums.edu.pk",insta:"@lumslit",updated:"4 February 2027"}
 ];
+var NEWS=[
+ {d:"2027-02-12",title:"Spring recruitment opens for 30+ societies"},
+ {d:"2027-02-06",title:"LUMUN 2027 confirms record international delegation"},
+ {d:"2027-01-29",title:"New venue booking process: one request, one reference"},
+ {d:"2027-01-21",title:"CCA Excellence Awards: nominations now open"}
+];
+var GALLERY=[
+ {pic:0,cap:"Society fair on the Main Lawn"},{pic:2,cap:"Debate Open House"},{pic:3,cap:"Film & Conversation"},
+ {pic:4,cap:"YLES founder workshop"},{pic:5,cap:"LUMICS opening ceremony"},{pic:1,cap:"SPADES tech expo"}
+];
 var EVENTS=[
  {id:"e1",soc:"lds",title:"Debate Open House",d:"2027-02-18",t:"6:00–8:00 PM",venue:"Academic Block, Room 101",cat:"Debate & MUN",open:"Open to all",pic:2,
   blurb:"Curious about debating? An informal evening of short debates, practical tips and conversation with the current council. No experience needed."},

@@ -10,7 +10,7 @@ var FULLM=["January","February","March","April","May","June","July","August","Se
 var DAY=["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
 var PIC=["hero.jpg","adv.jpg","ev1.jpg","ev2.jpg","ev3.jpg","ev4.jpg"];
 
-var S={mode:"public",view:"home",p:{},q:"",cat:"All",evTab:"upcoming",signed:false,soc:"lds",draft:{},inbox:"all",sheet:false};
+var S={mode:"public",view:"home",p:{},q:"",gq:"",slide:0,cat:"All",evTab:"upcoming",signed:false,soc:"lds",draft:{},inbox:"all",sheet:false};
 var toastT=null;
 function soc(id){for(var i=0;i<SOCIETIES.length;i++)if(SOCIETIES[i].id===id)return SOCIETIES[i];return SOCIETIES[0]}
 function venue(id){for(var i=0;i<VENUES.length;i++)if(VENUES[i].id===id)return VENUES[i];return null}
@@ -19,7 +19,7 @@ function reqByRef(r){for(var i=0;i<REQUESTS.length;i++)if(REQUESTS[i].ref===r)re
 function dayOf(iso){var p=iso.split("-");return DAY[new Date(+p[0],+p[1]-1,+p[2]).getDay()]}
 function fmtD(iso){var p=iso.split("-");return dayOf(iso)+", "+(+p[2])+" "+FULLM[+p[1]-1]}
 function dnum(i){return +i.split("-")[2]} function dmon(i){return MONTH[+i.split("-")[1]-1]}
-function go(v,p){S.view=v;S.p=p||{};window.scrollTo({top:0,behavior:"instant"});render()}
+function go(v,p){S.view=v;if(S.sheet==="menu"||S.sheet==="search")S.sheet=false;S.p=p||{};window.scrollTo({top:0,behavior:"instant"});render()}
 function toast(m){var o=$("#toast");if(o)o.remove();var d=document.createElement("div");d.className="toast";d.id="toast";d.textContent=m;document.body.appendChild(d);clearTimeout(toastT);toastT=setTimeout(function(){var t=$("#toast");if(t)t.remove()},3400)}
 function sendMail(to,cc,s,b){EMAILS.unshift({to:to,cc:cc,subj:s,body:b,when:"just now"});$("#mailCount").textContent=EMAILS.length}
 
@@ -31,7 +31,6 @@ var I={search:'<circle cx="8" cy="8" r="5.5"/><path d="M12.5 12.5 16 16"/>',arro
  check:'<path d="M3.5 9.5 7 13l7.5-8"/>'};
 function ic(n){return '<svg class="ico" viewBox="0 0 18 18" aria-hidden="true">'+I[n]+'</svg>'}
 
-var UTIL=["Apply","Admissions","Financial Aid","Donate","Campus Health","News","Events","Contact"];
 var MODES=[["public","Public site"],["portal","Society portal"],["staff","CCA staff"]];
 var NAVS={
  public:[["home","Home"],["about","About Us"],["socs","Societies & Clubs"],["events","Events Calendar"],["resources","Resources"],["work","Work with Us"]],
@@ -39,29 +38,44 @@ var NAVS={
  staff:[["inbox","Request Inbox"],["cal","Venue Calendar"],["pubq","Website Queue"]]
 };
 function paintChrome(){
-  $("#util").innerHTML=UTIL.map(function(u){return '<span'+(u==="Campus Health"?' class="hl"':'')+'>'+esc(u)+'</span>'}).join("");
   $("#roles").innerHTML=MODES.map(function(m){return '<button class="role" data-mode="'+m[0]+'" aria-pressed="'+(S.mode===m[0])+'">'+m[1]+'</button>'}).join("");
   var nav=NAVS[S.mode];if(S.mode==="portal"&&!S.signed)nav=[];
   var cur={soc:"socs",event:"events",form:"new",sent:"new",req:"mine",sreq:"inbox"}[S.view]||S.view;
   $("#nav").innerHTML=nav.map(function(n){return '<button data-go="'+n[0]+'"'+(cur===n[0]?' aria-current="page"':'')+'>'+esc(n[1])+'</button>'}).join("");
-  $("#officeTitle").textContent=S.mode==="staff"?"Office of Co-Curricular Activities \u2014 Staff":"Office of Co-Curricular Activities";
+  $("#officeTitle").textContent="Office of Co-Curricular Activities";
+  document.querySelector(".brandtitle .bk").textContent=S.mode==="staff"?"CCA staff workspace":S.mode==="portal"?"Society portal":"LUMS Campus Life";
   $("#whoami").innerHTML=S.mode==="portal"&&S.signed?'<b>'+esc(soc(S.soc).short)+'</b>Society executive'
     :(S.mode==="staff"?'<b>Ayesha Arshad</b>CCA staff':'');
   $("#mailCount").textContent=EMAILS.length;
 }
+var SLIDES=[
+ {pic:0,kick:"Welcome to CCA",title:"Find your people.<br>Do what matters.",text:"Every society, every event, and every way to get involved at LUMS \u2014 all in one place.",btn:["socs","Explore societies"]},
+ {pic:2,kick:"Spring 2027",title:"Recruitment season<br>is open.",text:"Debate, film, startups, service and more. Applications close at the end of February.",btn:["socs","See who\u2019s recruiting"]},
+ {pic:3,kick:"This week on campus",title:"Something on,<br>every evening.",text:"Screenings, open houses, workshops and tournaments, all approved and listed by CCA.",btn:["events","Open the calendar"]}
+];
 function heroBlock(){
   if(!(S.mode==="public"&&S.view==="home"))return "";
-  return '<div class="hero"><img class="bg" src="hero.jpg" alt="LUMS students at a society event"><div class="inner">'
-   +'<div class="panel"><div class="kick">LUMS Campus Life</div>'
-   +'<h2>Find your people.<br>Do what matters.</h2><div class="rule"></div>'
-   +'<p>Every society, every event, and one place for society executives to send CCA a request \u2014 instead of an email that disappears into a mailbox.</p>'
-   +'<div class="row"><button class="btn gold" data-go="socs">Explore societies '+ic("arrow")+'</button>'
-   +'<button class="btn ghost" data-jump="portal">Society portal</button></div></div></div></div>';
+  return '<section class="slider" aria-roledescription="carousel" aria-label="Highlights">'
+   +SLIDES.map(function(s,i){return '<div class="slide'+(i===S.slide?' on':'')+'" aria-hidden="'+(i!==S.slide)+'"><img class="bg" src="'+PIC[s.pic]+'" alt="">'
+     +'<div class="inner"><div class="panel"><div class="kick">'+s.kick+'</div><h2>'+s.title+'</h2><div class="rule"></div><p>'+s.text+'</p>'
+     +'<div class="row"><button class="btn gold" data-go="'+s.btn[0]+'"'+(i!==S.slide?' tabindex="-1"':'')+'>'+s.btn[1]+' '+ic("arrow")+'</button></div></div></div></div>'}).join("")
+   +'<div class="sctl"><button class="sarr" data-slide="prev" aria-label="Previous slide">'+ic("back")+'</button>'
+   +'<span class="dots">'+SLIDES.map(function(s,i){return '<button class="sdot" data-slide="'+i+'" aria-label="Slide '+(i+1)+'" aria-current="'+(i===S.slide)+'"></button>'}).join("")+'</span>'
+   +'<button class="sarr" data-slide="next" aria-label="Next slide">'+ic("arrow")+'</button></div></section>';
 }
+function setSlide(n){
+  S.slide=(n+SLIDES.length)%SLIDES.length;
+  var sl=document.querySelectorAll(".slide"),dt=document.querySelectorAll(".sdot");
+  for(var i=0;i<sl.length;i++){sl[i].classList.toggle("on",i===S.slide);sl[i].setAttribute("aria-hidden",i!==S.slide);
+    var b=sl[i].querySelector(".btn");if(b){if(i===S.slide)b.removeAttribute("tabindex");else b.setAttribute("tabindex","-1")}}
+  for(var k=0;k<dt.length;k++)dt[k].setAttribute("aria-current",k===S.slide);
+}
+if(!(window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches))
+  setInterval(function(){var s=document.querySelector(".slider");if(s&&!s.matches(":hover")&&!s.contains(document.activeElement))setSlide(S.slide+1)},6500);
 function statsBlock(){
   if(!(S.mode==="public"&&S.view==="home"))return "";
   var S4=[["45+","Societies &amp; Clubs"],["300+","Annual Events / Projects"],["1000+","Event Participants"],["2,078,005","Sponsorship Raised (PKR)"]];
-  return '<div class="stats"><div class="inner">'+S4.map(function(s){return '<div><div class="n tnum">'+s[0]+'</div><div class="l">'+s[1]+'</div></div>'}).join("")+'</div></div>';
+  return '<div class="stats"><div class="inner"><h2 class="h2 sh">Quick facts</h2><div class="sg">'+S4.map(function(s){return '<div><div class="n tnum">'+s[0]+'</div><div class="l">'+s[1]+'</div></div>'}).join("")+'</div></div></div>';
 }
 
 function evCard(e){
@@ -74,17 +88,56 @@ function socCard(s){
    +'<span>'+(s.recruiting?'<span class="pill ok">Recruiting</span>':'<span class="pill grey">Applications closed</span>')+'</span>'
    +'<span class="t">'+esc(s.name)+'</span><span class="d">'+esc(s.tag)+'</span></span></button>';
 }
+var AUDIENCE=[
+ ["New to LUMS",[["socs","Browse all societies"],["events","Orientation events"],["about","What CCA does"]]],
+ ["Current students",[["socs","Join a society"],["events","Events calendar"],["resources","Policies and forms"]]],
+ ["Faculty advisors",[["resources","Advisor handbook"],["about","How approvals work"],["work","Contact the office"]]],
+ ["Parents & visitors",[["events","Public events"],["about","About campus life"],["work","Get in touch"]]]
+];
 function vHome(){
-  var h='<div class="sec"><div class="hd"><h2 class="h2">What\u2019s on this week</h2><button class="link" data-go="events">Full calendar</button></div>'
-   +'<div class="grid g2">'+EVENTS.slice(0,3).map(evCard).join("")+'</div></div>';
+  var h='<div class="welcome"><h1 class="h1">Welcome to Campus Life</h1><div class="rule"></div>'
+   +'<p class="lede">The Office of Co-Curricular Activities supports 45+ student societies at LUMS \u2014 the debates, festivals, '
+   +'film nights, hackathons and service projects that make up life outside the classroom.</p></div>';
+  h+='<div class="quick"><div class="qh">Quick menu</div><div class="grid g4">'
+   +AUDIENCE.map(function(g){return '<div class="qcol"><h3 class="h3">'+esc(g[0])+'</h3><ul>'
+     +g[1].map(function(l){return '<li><button data-go="'+l[0]+'">'+esc(l[1])+'</button></li>'}).join("")+'</ul></div>'}).join("")+'</div></div>';
+  h+='<div class="grid ne">'
+   +'<div class="sec"><div class="hd"><h2 class="h2">News</h2><button class="link" data-toast="In the live site this opens the CCA news archive.">All news</button></div><ul class="nlist">'
+   +NEWS.map(function(n){return '<li><button data-toast="In the live site this opens the full story."><span class="when">'+esc(dnum(n.d)+" "+dmon(n.d)+" "+n.d.split("-")[0])+'</span><span class="t">'+esc(n.title)+'</span></button></li>'}).join("")+'</ul></div>'
+   +'<div class="sec"><div class="hd"><h2 class="h2">Events</h2><button class="link" data-go="events">All events</button></div><ul class="elist">'
+   +EVENTS.slice(0,4).map(function(e){return '<li><button data-ev="'+e.id+'"><span class="datebox"><span class="dd tnum">'+dnum(e.d)+'</span><span class="mm">'+dmon(e.d)+'</span></span>'
+     +'<span class="b"><span class="t">'+esc(e.title)+'</span><span class="d">'+esc(e.t)+' &middot; '+esc(e.venue)+'</span></span></button></li>'}).join("")+'</ul></div></div>';
   h+='<div class="sec"><div class="hd"><h2 class="h2">Recruiting now</h2><button class="link" data-go="socs">All societies</button></div><div class="grid g3">'
    +SOCIETIES.filter(function(s){return s.recruiting}).slice(0,3).map(socCard).join("")+'</div></div>';
-  h+='<div class="sec"><div class="hd"><h2 class="h2">For society executives</h2></div><div class="grid g3">'
-   +'<button class="card" data-jump="portal"><span class="t">Book a venue</span><span class="d">Auditorium, hall or lawn, with a live clash check.</span></button>'
-   +'<button class="card" data-jump="portal"><span class="t">Send a PR request</span><span class="d">Instagram, campus screens, the student mailer.</span></button>'
-   +'<button class="card" data-go="resources"><span class="t">Policies and forms</span><span class="d">Handbook, constitution, templates.</span></button>'
-   +'</div></div>';
+  h+='<div class="sec"><div class="hd"><h2 class="h2">Life at CCA</h2><button class="link" data-toast="In the live site this opens the full media gallery.">View all</button></div><div class="gallery">'
+   +GALLERY.map(function(g){return '<figure><img src="'+PIC[g.pic]+'" alt="'+esc(g.cap)+'" loading="lazy"><figcaption>'+esc(g.cap)+'</figcaption></figure>'}).join("")+'</div></div>';
   return h;
+}
+var MENU=[
+ ["Explore CCA",[["about","About Us"],["work","Work with Us"],["work","Contact"]]],
+ ["Get involved",[["socs","Societies & Clubs"],["socs","Recruiting now"],["resources","Start a society"]]],
+ ["Events",[["events","Events Calendar"],["events","Past events"]]],
+ ["Resources",[["resources","Policies and forms"],["resources","Society handbook"],["resources","Templates"]]]
+];
+function vMenu(){
+  return '<div class="overlay" id="sheet"><div class="mega"><div class="inner">'
+   +'<div class="row" style="justify-content:space-between;align-items:center"><span class="kick" style="color:var(--cyan)">Menu</span><button class="xbtn" data-close="1" aria-label="Close menu">\u00d7</button></div>'
+   +'<div class="mgrid">'+MENU.map(function(g){return '<div><h3>'+esc(g[0])+'</h3><ul>'
+     +g[1].map(function(l){return '<li><button data-pub="'+l[0]+'">'+esc(l[1])+'</button></li>'}).join("")+'</ul></div>'}).join("")+'</div></div></div></div>';
+}
+function searchResults(){
+  var q=S.gq.trim().toLowerCase();if(!q)return '<p class="small" style="color:#C3C6E0">Try \u201cdebate\u201d, \u201cfilm\u201d or \u201cLUMUN\u201d.</p>';
+  var so=SOCIETIES.filter(function(s){return (s.name+" "+s.tag+" "+s.short+" "+s.cat).toLowerCase().indexOf(q)>=0}).slice(0,5);
+  var ev=EVENTS.filter(function(e){return (e.title+" "+e.venue+" "+e.cat).toLowerCase().indexOf(q)>=0}).slice(0,5);
+  if(!so.length&&!ev.length)return '<p class="small" style="color:#C3C6E0">Nothing matches \u201c'+esc(S.gq)+'\u201d.</p>';
+  return (so.length?'<h3>Societies</h3><ul>'+so.map(function(s){return '<li><button data-soc="'+s.id+'">'+esc(s.name)+'</button></li>'}).join("")+'</ul>':'')
+   +(ev.length?'<h3>Events</h3><ul>'+ev.map(function(e){return '<li><button data-ev="'+e.id+'">'+esc(e.title)+' <span>'+esc(dnum(e.d)+" "+dmon(e.d))+'</span></button></li>'}).join("")+'</ul>':'');
+}
+function vSearch(){
+  return '<div class="overlay" id="sheet"><div class="mega"><div class="inner">'
+   +'<div class="row" style="justify-content:space-between;align-items:center"><span class="kick" style="color:var(--cyan)">Search</span><button class="xbtn" data-close="1" aria-label="Close search">\u00d7</button></div>'
+   +'<div class="search big">'+ic("search")+'<input id="gq" placeholder="Search for societies, events and much more\u2026" value="'+esc(S.gq)+'" aria-label="Search the site"></div>'
+   +'<div id="gqr" class="mres">'+searchResults()+'</div></div></div></div>';
 }
 function vSocs(){
   var q=S.q.trim().toLowerCase();
@@ -109,10 +162,6 @@ function vSoc(){
    +'<div class="sec"><div class="hd"><h2 class="h2">How to join</h2></div>'
    +(s.recruiting?'<div class="note ok"><b>Applications are open.</b> Apply by '+esc(s.deadline)+'.</div><div class="row"><button class="btn gold" data-toast="In the live site this opens the society\u2019s application form.">Apply to join '+ic("arrow")+'</button></div>'
      :'<div class="note"><b>Applications are closed for now.</b> Follow '+esc(s.insta)+' to hear when they open.</div>')+'</div>'
-   +'<div class="sec"><div class="hd"><h2 class="h2">Council 2026\u201327</h2></div><div class="grid g2">'
-   +s.council.map(function(c){var ini=c[0].split(" ").map(function(w){return w[0]}).join("");
-     return '<div class="row" style="align-items:center;gap:11px;flex-wrap:nowrap"><span class="avatar">'+esc(ini)+'</span><span><b>'+esc(c[0])+'</b><br><span class="small muted">'+esc(c[1])+'</span></span></div>'}).join("")
-   +'</div></div>'
    +'<div class="sec"><div class="hd"><h2 class="h2">Upcoming events</h2><button class="link" data-go="events">View all</button></div>'
    +(evs.length?'<div class="grid g2">'+evs.map(evCard).join("")+'</div>':'<p class="muted small">No events listed yet this term.</p>')+'</div>'
    +'<div class="sec"><div class="hd"><h2 class="h2">Connect</h2></div><dl class="kv"><dt>Email</dt><dd>'+esc(s.email)+'</dd><dt>Instagram</dt><dd>'+esc(s.insta)+'</dd></dl>'
@@ -424,11 +473,15 @@ function render(){
   var o=$("#sheet");if(o)o.remove();
   if(S.sheet==="guide")document.body.insertAdjacentHTML("beforeend",vGuide());
   if(S.sheet==="mail")document.body.insertAdjacentHTML("beforeend",vMailSheet());
-  var q=$("#q");if(q){q.focus();q.setSelectionRange(q.value.length,q.value.length)}
+  if(S.sheet==="menu")document.body.insertAdjacentHTML("beforeend",vMenu());
+  if(S.sheet==="search")document.body.insertAdjacentHTML("beforeend",vSearch());
+  $("#menuBtn").setAttribute("aria-expanded",S.sheet==="menu");
+  var q=S.sheet==="search"?$("#gq"):$("#q");if(q){q.focus();q.setSelectionRange(q.value.length,q.value.length)}
 }
 document.addEventListener("input",function(e){
   var t=e.target;
   if(t.id==="q"){S.q=t.value;render();return}
+  if(t.id==="gq"){S.gq=t.value;$("#gqr").innerHTML=searchResults();return}
   if(t.hasAttribute&&t.hasAttribute("data-d")){S.draft[t.getAttribute("data-d")]=t.value;
     if(S.view==="form"&&S.p.type==="venue")render();}
 });
@@ -441,21 +494,28 @@ document.addEventListener("change",function(e){
   }
   if(t.id==="whoSoc")S.soc=t.value;
 });
+document.addEventListener("keydown",function(e){if(e.key==="Escape"){togglePmenu(false);if(S.sheet){S.sheet=false;render()}}});
+function togglePmenu(force){var m=$("#pmenu"),b=$("#portalBtn");var open=force!=null?force:m.hidden;m.hidden=!open;b.setAttribute("aria-expanded",open)}
 document.addEventListener("click",function(e){
-  var t=e.target.closest("[data-mode],[data-go],[data-soc],[data-ev],[data-cat],[data-tab],[data-type],[data-req],[data-act],[data-inbox],[data-jump],[data-toast],[data-close],#signin,#submitReq,#guideBtn,#mailBtn,#themeBtn,.sheet");
+  if(!e.target.closest("#portalBtn")&&$("#pmenu"))togglePmenu(false);
+  var t=e.target.closest("[data-mode],[data-go],[data-soc],[data-ev],[data-cat],[data-tab],[data-type],[data-req],[data-act],[data-inbox],[data-jump],[data-toast],[data-close],[data-slide],[data-pub],#signin,#submitReq,#guideBtn,#mailBtn,#themeBtn,#menuBtn,#searchBtn,#portalBtn,.sheet,.overlay");
   if(!t)return;
   var a=function(n){return t.getAttribute(n)};
-  if(t.classList.contains("sheet")&&e.target===t){S.sheet=false;render();return}
+  if((t.classList.contains("sheet")||t.classList.contains("overlay"))&&e.target===t){S.sheet=false;render();return}
+  if(t.classList.contains("overlay")||t.classList.contains("sheet"))return;
+  if(t.id==="portalBtn"){togglePmenu();return}
+  if(t.id==="menuBtn"){S.sheet=S.sheet==="menu"?false:"menu";render();return}
+  if(t.id==="searchBtn"){S.sheet=S.sheet==="search"?false:"search";render();return}
+  if(a("data-slide")){var v=a("data-slide");setSlide(v==="prev"?S.slide-1:v==="next"?S.slide+1:+v);return}
+  if(a("data-pub")){S.mode="public";go(a("data-pub"));return}
   if(a("data-close")){S.sheet=false;render();return}
   if(t.id==="guideBtn"){S.sheet=S.sheet==="guide"?false:"guide";render();return}
   if(t.id==="mailBtn"){S.sheet=S.sheet==="mail"?false:"mail";render();return}
-  if(t.id==="themeBtn"){var c=document.documentElement.getAttribute("data-theme");
-    var dark=c?c==="dark":window.matchMedia("(prefers-color-scheme: dark)").matches;
-    document.documentElement.setAttribute("data-theme",dark?"light":"dark");return}
+  if(t.id==="themeBtn"){setTheme(document.documentElement.getAttribute("data-theme")==="dark"?"light":"dark");return}
   if(a("data-mode")){S.mode=a("data-mode");S.sheet=false;
     S.view=S.mode==="public"?"home":(S.mode==="portal"?(S.signed?"dash":"signin"):"inbox");
     window.scrollTo({top:0,behavior:"instant"});render();return}
-  if(a("data-jump")){if(a("data-jump")==="portal"){S.mode="portal";S.view=S.signed?"new":"signin"}else S.view=a("data-jump");
+  if(a("data-jump")){S.sheet=false;if(a("data-jump")==="portal"){S.mode="portal";S.view=S.signed?"new":"signin"}else S.view=a("data-jump");
     window.scrollTo({top:0,behavior:"instant"});render();return}
   if(a("data-toast")){toast(a("data-toast"));return}
   if(t.id==="signin"){S.signed=true;go("dash");return}
@@ -463,11 +523,17 @@ document.addEventListener("click",function(e){
   if(a("data-act")){decide(a("data-ref"),a("data-act"));return}
   if(a("data-cat")){S.cat=a("data-cat");render();return}
   if(a("data-tab")){S.evTab=a("data-tab");render();return}
-  if(a("data-soc")){S.mode="public";go("soc",{id:a("data-soc")});return}
-  if(a("data-ev")){S.mode="public";go("event",{id:a("data-ev")});return}
+  if(a("data-soc")){S.mode="public";S.sheet=false;go("soc",{id:a("data-soc")});return}
+  if(a("data-ev")){S.mode="public";S.sheet=false;go("event",{id:a("data-ev")});return}
   if(a("data-type")){S.draft={};go("form",{type:a("data-type")});return}
   if(a("data-req")){S.view=S.mode==="staff"?"sreq":"req";S.p={ref:a("data-req")};window.scrollTo({top:0,behavior:"instant"});render();return}
   if(a("data-go")){go(a("data-go"));return}
 });
-render();
+function setTheme(m){document.documentElement.setAttribute("data-theme",m);
+  var b=$("#themeBtn"),l=m==="dark"?"Switch to light mode":"Switch to dark mode";b.setAttribute("aria-label",l);b.setAttribute("title",l);
+  try{localStorage.setItem("cca-theme",m)}catch(e){}}
+(function(){var m="light";try{m=localStorage.getItem("cca-theme")||"light"}catch(e){}setTheme(m)})();
+function syncProto(){var p=document.querySelector(".proto");if(p)document.documentElement.style.setProperty("--protoH",p.offsetHeight+"px")}
+window.addEventListener("resize",syncProto);
+render();syncProto();
 })();
