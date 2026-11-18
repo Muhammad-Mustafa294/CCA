@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>CCA Campus Life — Office of Co-Curricular Activities, LUMS</title>
+<meta name="description" content="Prototype of a rebuilt CCA website for LUMS: society directory, campus events calendar, and a society portal for venue, PR and event requests.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Noto+Sans+Display:wght@600;700&family=Noto+Serif:wght@700&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div class="proto"><div class="inner">
+  <b>Prototype</b>
+  <span class="t">Team OS-Victims &middot; not a live LUMS service</span>
+  <span class="sp"></span>
+  <span id="roles" style="display:flex;gap:6px;flex-wrap:wrap"></span>
+  <button class="gbtn" id="guideBtn">Demo guide</button>
+  <button class="gbtn" id="themeBtn">Theme</button>
+</div></div>
+
+<div class="utility"><div class="inner" id="util"></div></div>
+
+<header class="masthead"><div class="inner">
+  <span class="lock">
+    <img class="l" src="logo.png" alt="LUMS, A Not-for-Profit University" width="223" height="83">
+    <img class="s" src="slogan.png" alt="Learning Without Borders" width="259" height="39">
+  </span>
+  <span class="sp"></span>
+  <span class="whoami" id="whoami"></span>
+  <button class="mbtn">Menu</button>
+  <button class="iconbtn" aria-label="Search"><svg class="ico" viewBox="0 0 18 18"><circle cx="8" cy="8" r="5.5"/><path d="M12.5 12.5 16 16"/></svg></button>
+  <button class="iconbtn" aria-label="Portal"><svg class="ico" viewBox="0 0 18 18"><circle cx="9" cy="6" r="3"/><path d="M3.5 15.5c.8-3 2.9-4.5 5.5-4.5s4.7 1.5 5.5 4.5"/></svg></button>
+</div></header>
+
+<div class="officebar"><div class="inner"><h1 id="officeTitle">Office of Co-Curricular Activities</h1></div></div>
+<nav class="ccanav"><div class="inner" id="nav"></div></nav>
+
+<div id="hero"></div>
+<div id="stats"></div>
+
+<main><div class="inner" id="page"></div></main>
+
+<footer>
+  <div class="inner">
+    <div>
+      <img class="fl" src="logow.jpg" alt="LUMS">
+      <p class="small" style="color:#9FA3C4">DHA, Lahore Cantt. 54792<br>Lahore, Pakistan<br>+92 42 3560 8000</p>
+    </div>
+    <div><h4>Students</h4><ul><li>Student Affairs</li><li>Academic Calendar</li><li>Library</li><li>Pay Online</li></ul></div>
+    <div><h4>Campus</h4><ul><li>Financial Statements</li><li>Phone Directory</li><li>Campus Health</li><li>Campus Mail</li></ul></div>
+    <div><h4>Contact</h4><ul><li>Contact Us</li><li>Directions to LUMS</li><li>Careers</li><li>Privacy Policy</li></ul></div>
+  </div>
+  <div class="legal">2027 &copy; Lahore University of Management Sciences. All Rights Reserved. &middot; <span style="color:var(--gold)">Prototype by Team OS-Victims</span></div>
+</footer>
+
+<button class="mailbtn" id="mailBtn">Email trail <span class="c tnum" id="mailCount">0</span></button>
+
+<script src="data.js"></script>
+<script src="app.js"></script>
+
+</body>
+</html>
