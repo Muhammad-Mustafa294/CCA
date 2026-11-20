@@ -72,7 +72,7 @@ function coverflow(){
       +'<div class="cfcap"><span class="cfsoc">'+(s.logo?'<span class="elogo"><img src="'+esc(s.logo)+'" alt=""></span>':'')+esc(s.name)+'</span>'
       +'<b>'+esc(h.title)+'</b><span class="cft">'+esc(h.text)+'</span><button class="cfgo" data-soc="'+s.id+'" tabindex="-1">Visit society '+ic("arrow")+'</button></div></div>'}).join("")
    +'</div><div class="wrap cfctl"><button class="cfb" data-cf="prev" aria-label="Previous highlight">'+ic("back")+'</button>'
-   +'<span class="cfnum"><b id="cfn">01</b><span>/ '+pad(n)+'</span></span><span class="cfbar"><span id="cfbar"></span></span>'
+   +'<span class="cfbar"><span id="cfbar"></span></span>'
    +'<button class="cfb" data-cf="next" aria-label="Next highlight">'+ic("arrow")+'</button></div></div>';
 }
 function vHome(){
@@ -87,15 +87,19 @@ function vHome(){
    +'<div class="hzoom"><div class="wrap htop" id="htop">'
    +'<h1 class="display xl words rv">45+ societies. <em>One campus.</em></h1>'
    +'<div class="hrow"><p class="lead rv">Debate, theatre, service, sport, tech and everything between. Find the society that fits you, and every event at LUMS this term.</p>'
-   +'<div class="row rv"><button class="btn primary mag" data-go="socs">Explore societies '+ic("arrow")+'</button><button class="btn ghost mag" data-go="events">See what’s on</button></div></div>'
+   +'<div class="hfindw rv"><form class="hfind" id="hfind" role="search"><span class="hfi">'+ic("search")+'</span>'
+   +'<input id="hq" name="q" placeholder="Find a society: debate, polo, film\u2026" aria-label="Find a society" autocomplete="off"><button type="submit">Search</button></form>'
+   +'<div class="hcats"><span>Popular:</span>'+["Debate & MUN","Service","Sports","Arts & Culture"].map(function(c){return '<button data-catgo="'+esc(c)+'">'+esc(c)+'</button>'}).join("")+'</div></div></div>'
    +'</div>'+coverflow()+'</div></section>';
 
   h+='<section class="marq" aria-label="Some of the societies at LUMS"><p class="wrap mlabel">Home to societies like</p>'
    +'<div class="marquee"><div class="mtrack">'+strip+'<span class="mdup" aria-hidden="true">'+strip+'</span></div></div></section>';
 
-  h+='<section class="pin" id="pin"><div class="pinwrap"><div class="wrap">'+shead("What’s <em>on</em>",["events","Full calendar"])+'</div>'
+  h+='<section class="sec erowsec"><div class="wrap"><div class="shead"><h2 class="display md words rv">What\u2019s <em>on</em></h2>'
+   +'<div class="row"><button class="rbtn" data-row="-1" aria-label="Scroll events left">'+ic("back")+'</button><button class="rbtn" data-row="1" aria-label="Scroll events right">'+ic("arrow")+'</button>'
+   +'<button class="tlink" data-go="events">Full calendar'+ic("arrow")+'</button></div></div></div>'
    +'<div class="ptrack" id="ptrack">'+EVENTS.map(eventCard).join("")
-   +'<button class="emore" data-go="events"><span class="display sm on">The full <em>calendar</em></span>'+ic("arrow")+'</button></div></div></section>';
+   +'<button class="emore" data-go="events"><span class="display sm on">The full <em>calendar</em></span>'+ic("arrow")+'</button></div></section>';
 
   h+='<section class="kin" aria-hidden="true"><div class="krow"><div class="ktrack">'+kin(0)+'</div></div><div class="krow rev"><div class="ktrack">'+kin(6)+'</div></div></section>';
 
@@ -153,6 +157,18 @@ function socPhotos(s){
   add(s.photo,s.name);
   return out;
 }
+function socFaq(s,evs){
+  if(s.faq&&s.faq.length)return s.faq;
+  var nx=evs[0];
+  return [
+    ["How do I join "+s.short+"?",s.recruiting?"Applications are open until "+s.deadline+". Use the Apply to join button on this page to send your application."
+      :"Applications are closed right now. Follow "+s.insta+" on Instagram to hear when the next round opens."],
+    ["Do I need any experience?","Not usually. If a role needs specific skills or experience, the application will say so."],
+    ["What does "+s.short+" do?",s.about],
+    ["When is the next event?",nx?nx.title+", on "+fmtD(nx.d)+" at "+nx.venue+".":"Nothing is listed for this term yet. New events appear on this page and in the Events calendar once CCA approves them."],
+    ["How can I contact the society?","Email "+s.email+" or message "+s.insta+" on Instagram."]
+  ];
+}
 function vSoc(){
   var s=soc(S.p.id),evs=EVENTS.filter(function(e){return e.soc===s.id});
   var idx=SOCIETIES.indexOf(s),next=SOCIETIES[(idx+1)%SOCIETIES.length],photos=socPhotos(s);
@@ -173,7 +189,9 @@ function vSoc(){
    +(photos.length?'<h2 class="display sm sub rv">In <em>pictures</em></h2><div class="sgal n'+Math.min(photos.length,3)+'">'+photos.map(function(p){return '<figure class="rv"><img src="'+esc(p[0])+'" alt="'+esc(p[1])+'" loading="lazy"><figcaption>'+esc(p[1])+'</figcaption></figure>'}).join("")+'</div>':'')
    +'<h2 class="display sm sub rv">Upcoming <em>events</em></h2>'
    +(evs.length?'<div class="egrid">'+evs.map(eventCard).join("")+'</div>':'<div class="empty left rv">'+ic("cal")+'<b>No events listed yet this term.</b><span>Follow '+esc(s.insta)+' to hear about the next one.</span></div>')
-   +'</div><aside class="panel rv"><h3>How to join</h3>'
+   +'<h2 class="display sm sub words rv">Frequently asked <em>questions</em></h2><div class="faq">'
+   +socFaq(s,evs).map(function(f,i){return '<details class="rv"'+(i===0?' open':'')+'><summary>'+esc(f[0])+'<span class="fx-i" aria-hidden="true"></span></summary><p>'+esc(f[1])+'</p></details>'}).join("")
+   +'</div></div><aside class="panel rv"><h3>How to join</h3>'
    +(s.recruiting?'<p>Applications are open until <b>'+esc(s.deadline)+'</b>.</p><button class="btn solid wide mag" data-toast="In the live site this opens the society’s application form.">Apply to join '+ic("arrow")+'</button>'
      :'<p>Applications are closed for now. Follow '+esc(s.insta)+' to hear when they open.</p>')
    +'<hr><h3>Connect</h3><p class="cline">'+ic("mail")+esc(s.email)+'</p><p class="cline">'+ic("at")+esc(s.insta)+'</p>'
@@ -294,7 +312,7 @@ function render(){
   if(S.sheet==="search")document.body.insertAdjacentHTML("beforeend",vSearch());
   $("#menuBtn").setAttribute("aria-expanded",S.sheet==="menu");
   var q=S.sheet==="search"?$("#gq"):null;if(q){q.focus();q.setSelectionRange(q.value.length,q.value.length)}
-  enhance(fresh);cfInit();pinLayout();fxInit();onScroll();
+  enhance(fresh);cfInit();fxInit();onScroll();
 }
 
 /* ---------- reveal: words rise, blocks ease in, numbers count ---------- */
@@ -347,7 +365,7 @@ function cfLayout(){
 }
 function cfIndex(){var n=cfSlides().length;return ((Math.round(CF.pos)%n)+n)%n}
 function cfApply(){
-  cfLayout();var n=$("#cfn");if(n)n.textContent=pad(cfIndex()+1);
+  cfLayout();
   var bar=$("#cfbar");if(bar){bar.classList.remove("run");void bar.offsetWidth;bar.classList.add("run")}
   cfSchedule();
 }
@@ -382,7 +400,7 @@ window.addEventListener("pointerup",function(e){
   cfApply();
 });
 document.addEventListener("visibilitychange",cfSchedule);
-window.addEventListener("resize",function(){cfLayout();pinLayout();fxSize()});
+window.addEventListener("resize",function(){cfLayout();fxSize()});
 
 /* ---------- magnetic buttons ---------- */
 var magEl=null;
@@ -392,39 +410,11 @@ function magnet(e){
   if(m){var r=m.getBoundingClientRect(),x=e.clientX-(r.left+r.width/2),y=e.clientY-(r.top+r.height/2);m.style.transform="translate("+(x*.22).toFixed(1)+"px,"+(y*.3).toFixed(1)+"px)";magEl=m}
 }
 
-/* ---------- events that travel sideways as you scroll ---------- */
-var PIN={shift:0};
-function pinLayout(){
-  var sec=$("#pin"),tr=$("#ptrack");if(!sec||!tr)return;
-  if(RM||window.innerWidth<1100){sec.classList.remove("on");sec.style.height="";tr.style.transform="";return}
-  sec.classList.add("on");tr.style.transform="";
-  PIN.shift=Math.max(0,tr.scrollWidth-window.innerWidth);
-  sec.style.height=(window.innerHeight+PIN.shift)+"px";pinScroll();
-}
-function pinScroll(){
-  var sec=$("#pin");if(!sec||!sec.classList.contains("on"))return;
-  var r=sec.getBoundingClientRect(),span=sec.offsetHeight-window.innerHeight,p=span>0?clamp(-r.top/span,0,1):0;
-  $("#ptrack").style.transform="translate3d("+(-p*PIN.shift).toFixed(1)+"px,0,0)";
-}
-
-/* ---------- smooth, weighted scrolling (mouse wheels only) ---------- */
-var SS={y:0,t:0,on:false,raf:0};
-function ssMax(){return document.documentElement.scrollHeight-window.innerHeight}
-function ssLoop(){var d=SS.t-SS.y;SS.y+=d*.095;if(Math.abs(d)<.5){SS.y=SS.t;SS.on=false}window.scrollTo(0,SS.y);if(SS.on)SS.raf=requestAnimationFrame(ssLoop)}
-function jump(y){cancelAnimationFrame(SS.raf);SS.on=false;SS.y=SS.t=y;window.scrollTo(0,y)}
-if(!RM&&FINE)window.addEventListener("wheel",function(e){
-  if(e.ctrlKey||S.sheet||Math.abs(e.deltaX)>Math.abs(e.deltaY))return;
-  e.preventDefault();if(!SS.on){SS.y=SS.t=window.scrollY}
-  SS.t=clamp(SS.t+e.deltaY*(e.deltaMode===1?32:e.deltaMode===2?window.innerHeight:1),0,ssMax());
-  if(!SS.on){SS.on=true;SS.raf=requestAnimationFrame(ssLoop)}
-},{passive:false});
+function jump(y){window.scrollTo(0,y)}
 
 function onScroll(){
   var y=window.scrollY;
-  if(SS.on&&Math.abs(y-SS.y)>2){cancelAnimationFrame(SS.raf);SS.on=false}
-  if(!SS.on){SS.y=SS.t=y}
   $("#site").classList.toggle("scrolled",y>12);
-  pinScroll();
   var ht=$("#htop");if(ht&&!RM){var p=Math.min(1,y/700);ht.style.transform="translate3d(0,"+(y*.28).toFixed(1)+"px,0)";ht.style.opacity=(1-p*1.1).toFixed(3)}
 }
 window.addEventListener("scroll",onScroll,{passive:true});
@@ -475,13 +465,18 @@ document.addEventListener("input",function(e){
   if(t.id==="gq"){S.gq=t.value;$("#gqr").innerHTML=searchResults();return}
 });
 document.addEventListener("keydown",function(e){if(e.key==="Escape"&&S.sheet){S.sheet=false;render()}});
+document.addEventListener("submit",function(e){
+  if(e.target.id!=="hfind")return;e.preventDefault();
+  S.q=($("#hq").value||"").trim();S.cat="All";S.rec=false;go("socs");
+});
 document.addEventListener("click",function(e){
-  var t=e.target.closest("[data-go],[data-soc],[data-ev],[data-cat],[data-catgo],[data-rec],[data-tab],[data-toast],[data-close],[data-cf],#searchBtn,#menuBtn,#themeBtn,.overlay");
+  var t=e.target.closest("[data-go],[data-soc],[data-ev],[data-cat],[data-catgo],[data-rec],[data-tab],[data-toast],[data-close],[data-cf],[data-row],#searchBtn,#menuBtn,#themeBtn,.overlay");
   if(!t)return;
   var a=function(n){return t.getAttribute(n)};
   if(t.classList.contains("overlay")){if(e.target===t||e.target.classList.contains("glow")){S.sheet=false;render()}return}
   if(a("data-close")){S.sheet=false;render();return}
   if(a("data-cf")){cfGo(a("data-cf")==="next"?1:-1);return}
+  if(a("data-row")){var tr=$("#ptrack");if(tr)tr.scrollBy({left:(+a("data-row"))*Math.round(tr.clientWidth*.8),behavior:RM?"auto":"smooth"});return}
   if(t.id==="menuBtn"){S.sheet=S.sheet==="menu"?false:"menu";render();return}
   if(t.id==="searchBtn"){S.sheet=S.sheet==="search"?false:"search";render();return}
   if(t.id==="themeBtn"){setTheme(document.documentElement.getAttribute("data-theme")==="dark"?"light":"dark");return}
@@ -509,13 +504,13 @@ function boot(){
   render();
   var L=$("#loader");
   if(!L){ready();return}
-  var srcs=HIGHLIGHTS.slice(0,3).map(function(h){return h.src}).concat(["img/lums-white.png"]),done=0,t0=performance.now(),shown=0,pct=$("#lpct");
+  var srcs=HIGHLIGHTS.slice(0,3).map(function(h){return h.src}).concat(["img/lums-white.png"]),done=0,t0=performance.now(),shown=0;
   srcs.forEach(function(s){var im=new Image();im.onload=im.onerror=function(){done++};im.src=s});
   var minT=RM?200:1700,maxT=5000;
   (function tick(now){
     var el=Math.max(0,now-t0),target=el>maxT?1:Math.min(done/srcs.length,el/minT);
     shown+=(target*100-shown)*(RM?1:.09);if(target>=1&&shown>99.4)shown=100;
-    pct.textContent=Math.floor(shown);L.style.setProperty("--p",(shown/100).toFixed(3));
+    L.style.setProperty("--p",(shown/100).toFixed(3));
     if(shown<100){requestAnimationFrame(tick);return}
     L.classList.add("out");
     setTimeout(ready,RM?0:520);

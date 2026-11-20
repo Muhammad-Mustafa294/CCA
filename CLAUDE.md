@@ -69,11 +69,11 @@ img/          lums-white.png (crest), soc/ (society logos), banner/ and photo/ (
 - Events are **delegated**: global `input`, `click` and `keydown` listeners dispatch on `data-*` attributes (`data-go`, `data-soc`, `data-ev`, `data-cat`, `data-catgo`, `data-rec`, `data-tab`, `data-cf`, `data-toast`). To add an interaction, add a `data-` attribute and a branch in the click handler.
 - `data.js` declares top-level `var`s, so the IIFE in `app.js` picks them up off the global scope. `data.js` must load first.
 - **Motion**, all disabled under `prefers-reduced-motion`:
-  - **Loader:** the crest rises with load progress, then a curtain lifts and the hero zooms in (`boot()` / `ready()`). A CSS safety timer hides the loader after 8s if JS fails, and it only appears when the inline script has added `html.js`.
+  - **Loader:** the crest rises with load progress (no percentage shown), then a curtain lifts and the hero zooms in (`boot()` / `ready()`). A CSS safety timer hides the loader after 8s if JS fails, and it only appears when the inline script has added `html.js`.
   - **3D highlights carousel** (`HIGHLIGHTS` in data.js; `cfLayout()`): centre slide large, neighbours smaller and tilted. Each slide uses its own `perspective()` instead of a shared 3D space, so clicks reach the side slides.
   - **WebGL gradient** behind the hero (`fxInit()`), at half resolution, paused when off-screen. The CSS gradient underneath is the fallback.
-  - **Smooth wheel scrolling** for mouse users only; it hands control back if anything else scrolls the page.
-  - **"What's on"** pins and travels sideways on desktop (`pinLayout()`); native horizontal scroll below 1100px.
+  - Scrolling is the browser's own. A custom smooth-scroll and a pinned sideways events section were tried and removed (20 Nov): they made the page hard to scroll. Keep scrolling native.
+  - **"What's on"** is a normal horizontal row with arrow buttons (`data-row`).
   - **Reveals:** words rise on elements with class `words`. Don't reuse `.split`, which is the two-column page layout. Blocks with `rv` ease in, and numbers with `data-to` count up.
 
 ### Conventions
@@ -101,6 +101,7 @@ The crest and all photography come from `cca.lums.edu.pk`; every photo is credit
 
 - **Real:** CCA's statistics, the society names and logos, the photos, the audit findings.
 - **Mock:** events, news, society descriptions for the newer entries, emails, Instagram handles and deadlines.
+- **Society FAQs** are built from each society's own details by `socFaq()`. To give a society real answers, add `faq:[["Question","Answer"],…]` to its entry in `data.js`; that replaces the generated set.
 
 ### Running and testing
 
