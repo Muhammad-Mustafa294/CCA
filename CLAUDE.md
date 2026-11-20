@@ -22,22 +22,16 @@ This repo is the prototype we demo. It is **not** the final product. The real bu
 | Khadija Khalid | 28100271 | SPADES | Content and research |
 | Zahrah Masood | 28100280 | LES | QA and handover |
 
-## The core idea
+## Current direction (from 20 November 2026)
 
-**Do not treat this as a website redesign.** The current site isn't failing because it looks dated — it's failing because information only flows *out*, and only when a human retypes it. The actual work of CCA (approving events, booking the auditorium, clearing PR, signing off sponsorships) happens in Outlook, where it has no status, no reference number and no memory across council handovers. The two never connect. That's why the homepage's "Featured Event" is from January.
+After the pitch, CCA asked for **a public website only, and for it to look beautiful**: the kind of site people say "woah" at, in **shades of purple**. So:
 
-So the product has two halves that are one idea:
+- The society portal, staff queue, venue picker and email trail are **gone from this prototype**. The portal idea below is kept as history and as a possible later phase, not as current scope.
+- The design moved from the LUMS blue chrome to a **purple design system** with a display serif, motion, a loading screen, a 3D highlights carousel and richer society pages (see *Design system*).
 
-- **Inward** — societies sign in and send CCA a request. Seven types: venue booking, PR, event proposal, equipment/logistics, sponsorship/NOC, profile update, other. Each gets a reference (`CCA-VEN-0413`), a live status, and a one-working-day reply target.
-- **Outward** — the public site is a *byproduct* of those decisions. CCA approves an event once and it appears on the calendar, the society page and the homepage automatically.
+## The original core idea (pitch, 19 Nov 2026)
 
-The pitch line: **"Approve once, publish everywhere."**
-
-The objection-killer: **email does not go away.** Every request and decision still emails `cca@lums.edu.pk` and the society with the reference attached. The portal gives that correspondence a spine; it doesn't replace Outlook.
-
-Two demo moments carry the whole pitch:
-1. **The availability check** — a venue booking asks for date, time and headcount first, then lists HSS A1–A15. Free rooms that fit are pickable (smallest fit first); booked or too-small rooms stay visible but disabled with the reason. 18 Feb, 6–9 PM, 120 people shows A1 held by LUMUN 17:00–21:00. Room capacities in `VENUES` are placeholders until CCA confirms them.
-2. **Approve once, publish everywhere** — submit an event in the portal, approve it as staff, switch to the public Events Calendar, it's there.
+The current site's information only flows *out*, and only when a human retypes it; CCA's real work (approving events, booking rooms, clearing PR and sponsorships) happens in Outlook with no status or reference. The pitched product joined the two: societies send requests through a portal, and the public site is a byproduct of CCA's approvals ("Approve once, publish everywhere"), with every request still mirrored into email. CCA has since narrowed the brief to the public site.
 
 ## What we found in the audit (the evidence base)
 
@@ -60,58 +54,53 @@ Captured 30 October 2026 from the live site. Use these, don't re-derive them:
 Static. No build step, no framework, no dependencies, no server. Open `index.html` and it runs.
 
 ```
-index.html    page shell — LUMS chrome, masthead, nav mounts, footer
-styles.css    all styling; design tokens live in :root at the top
-data.js       ALL content: societies, events, venues, bookings, request types, seed requests/emails
-app.js        routing, rendering, the request flow
-*.png *.jpg   LUMS crest, slogan, white logo, and photography
+index.html    page shell: loader, fixed header, page mount, footer
+styles.css    all styling; every colour is a token in :root at the top
+data.js       ALL content: societies, events, past events, news, gallery, homepage highlights
+app.js        routing, rendering, motion and interactions
+img/          lums-white.png (crest), soc/ (society logos), banner/ and photo/ (society photography)
 ```
-
-Files are flat in the repo root (not in `assets/`) because they were uploaded through GitHub's web UI, which can't create folders. Fine at this size. If you restructure into `assets/`, update the four `src`/`href` references in `index.html` plus `PIC[]` and the hero `<img>` in `app.js`.
 
 ### How it works
 
-`app.js` is one IIFE. State lives in a single object `S`:
+`app.js` is one IIFE. State lives in a single object `S = { view, p, q, cat, rec, evTab, sheet, gq }`.
 
-```js
-S = { mode, view, p, q, cat, evTab, signed, soc, draft, inbox, sheet }
-```
-
-- `S.mode` is the role: `"public" | "portal" | "staff"` (the three buttons in the black bar).
-- `S.view` is the screen within that role.
-- `render()` picks a `v<Name>()` function, which returns an **HTML string**. Everything is string templating into `innerHTML`; there is no virtual DOM and no framework.
-- Events are **delegated** — three global listeners (`input`, `change`, `click`) at the bottom of `app.js` dispatch on `data-*` attributes (`data-go`, `data-mode`, `data-soc`, `data-type`, `data-req`, `data-act`, …). To add an interaction, add a `data-` attribute and a branch in the click handler.
-- `data.js` declares top-level `var`s, so the IIFE in `app.js` picks them up off the global scope. `data.js` must load first — it does, in `index.html`.
+- `render()` picks a `v<Name>()` function (`vHome`, `vSocs`, `vSoc`, `vEvents`, `vEvent`, `vAbout`, `vResources`, `vPartner`), which returns an **HTML string** for `#page`.
+- Events are **delegated**: global `input`, `click` and `keydown` listeners dispatch on `data-*` attributes (`data-go`, `data-soc`, `data-ev`, `data-cat`, `data-catgo`, `data-rec`, `data-tab`, `data-cf`, `data-toast`). To add an interaction, add a `data-` attribute and a branch in the click handler.
+- `data.js` declares top-level `var`s, so the IIFE in `app.js` picks them up off the global scope. `data.js` must load first.
+- **Motion**, all disabled under `prefers-reduced-motion`:
+  - **Loader:** the crest rises with load progress, then a curtain lifts and the hero zooms in (`boot()` / `ready()`). A CSS safety timer hides the loader after 8s if JS fails, and it only appears when the inline script has added `html.js`.
+  - **3D highlights carousel** (`HIGHLIGHTS` in data.js; `cfLayout()`): centre slide large, neighbours smaller and tilted. Each slide uses its own `perspective()` instead of a shared 3D space, so clicks reach the side slides.
+  - **WebGL gradient** behind the hero (`fxInit()`), at half resolution, paused when off-screen. The CSS gradient underneath is the fallback.
+  - **Smooth wheel scrolling** for mouse users only; it hands control back if anything else scrolls the page.
+  - **"What's on"** pins and travels sideways on desktop (`pinLayout()`); native horizontal scroll below 1100px.
+  - **Reveals:** words rise on elements with class `words`. Don't reuse `.split`, which is the two-column page layout. Blocks with `rv` ease in, and numbers with `data-to` count up.
 
 ### Conventions
 
-- **ES5-flavoured vanilla JS** (`var`, `function`, no arrow functions, no template literals). Keep it that way; it's deliberate and keeps the file readable to the whole team.
+- **ES5-flavoured vanilla JS** (`var`, `function`, no arrow functions, no template literals). Keep it that way.
 - `esc()` every interpolated value. Never put raw user/data strings into `innerHTML`.
-- Dates are `"YYYY-MM-DD"`. Use `dayOf()` / `fmtD()` — never `new Date(iso)` directly, which parses as UTC and shifts the weekday.
-- Colours come from CSS custom properties only. **Do not hardcode hex values in component rules** — it breaks dark mode, which is fully implemented.
-- No dependencies. No npm. No build. If a change needs a library, it's probably the wrong change for this prototype.
+- Dates are `"YYYY-MM-DD"`. Use `dayOf()` / `fmtD()`, never `new Date(iso)` directly.
+- Colours come from CSS custom properties only. **Do not hardcode hex values in component rules**; it breaks dark mode. For translucent colours use the `--*-rgb` tokens, e.g. `rgba(var(--p500-rgb),.5)`.
+- No dependencies. No npm. No build.
 
-### Design system — taken from the live LUMS sites, not invented
+### Design system
 
-| Token | Value | Where it's from |
+| Token | Value | Use |
 |---|---|---|
-| `--brand` | `#2E3192` | Top utility bar, Menu button |
-| `--cca` | `#04198B` | Primary buttons, office title |
-| `--head` | `#002581` | Headings |
-| `--deep` | `#00064B` | Footer |
-| `--gold` | `#FFB300` | Secondary buttons, accent rule |
-| `--cyan` | `#00CEFF` | Button hairline, "Campus Health" |
-| `--band` / `--ink` | `#F2F2F2` / `#333333` | Section bands, body text |
+| `--p950` to `--p50` | `#12072B` … `#F7F4FE` | the purple scale: dark surfaces, cards, tints |
+| `--gold` | `#FFB300` | primary buttons and small accents (the LUMS gold) |
+| `--head` / `--ink` / `--muted` | role tokens | headings, body text, secondary text; redefined for dark mode |
+| `--logo-bg` | white in both themes | society logos are designed for white |
 
-Type is **Noto Sans** with **Noto Sans Display Bold** for headings — the actual LUMS faces. Border radius is **4px**, matching LUMS buttons. Primary buttons are `--cca` with a `--cyan` hairline, exactly like the "For Alumni" buttons on lums.edu.pk.
+Type: **Fraunces** (display serif, italic for emphasis) and **Noto Sans** (the LUMS body face). Radius is 16px, 28px for large cards; buttons are pills. Dark purple surfaces (hero, page heads, numbers band, footer) share one gradient.
 
-The crest, the "Learning Without Borders" slogan and all photography are pulled from `cca.lums.edu.pk`. They're the University's own assets, used to show CCA what their site could look like. **Keep the "Prototype — not a live LUMS service" banner** on every screen; it's what makes that honest.
+The crest and all photography come from `cca.lums.edu.pk`; every photo is credited to the society it belongs to. **Keep the "Prototype · not a live LUMS service" bar** on every screen.
 
 ### What's real and what isn't
 
-- **Real:** the design tokens, typography, crest, photos, CCA's statistics, the audit findings, the LUMS information architecture (Home / About Us / Societies & Clubs / Events Calendar / Resources).
-- **Mock:** society councils, events, requests, bookings, the email trail, and every person's name except the team's and Ayesha's. Sign-in is a dropdown — **there are no accounts and no passwords, by design.** Don't add real auth to the prototype.
-- **State is in memory.** Anything approved during a demo resets on reload. That's intentional — the demo can be run twice.
+- **Real:** CCA's statistics, the society names and logos, the photos, the audit findings.
+- **Mock:** events, news, society descriptions for the newer entries, emails, Instagram handles and deadlines.
 
 ### Running and testing
 
@@ -119,9 +108,15 @@ The crest, the "Learning Without Borders" slogan and all photography are pulled 
 python3 -m http.server 8000     # http://localhost:8000
 ```
 
-Opening `index.html` directly also works. There are no tests. Before pushing anything, manually walk the six-step path in the **Demo guide** button — especially the clash check and approve-then-publish, because those are the two things that must not break before a demo.
+There are no automated tests in the repo. Before pushing, check by hand:
+- the loader completes
+- the carousel works with its buttons, drag, and clicking a side slide
+- search for "chess" finds the Chess Club
+- a society page renders
+- light and dark themes
+- a 390px-wide phone screen
 
-Pushing to `main` redeploys GitHub Pages in about a minute.
+Pushing to `main` redeploys GitHub Pages in about a minute. The Vercel copy (`cca-campus-life.vercel.app`) updates with `vercel deploy --prod`.
 
 ## Roadmap — what's actually being proposed to CCA
 
@@ -129,7 +124,7 @@ The prototype is the pitch. The contracted build is different:
 
 - **WordPress**, not static — already cleared by LUMS IST (Adil Sarwar, 29 September 2026). Managed hosting so nobody at CCA maintains a server. This matters: the panel includes an IST representative.
 - **Events sync from Notion.** CCA already runs on Notion databases. Plan: societies submit via the Tally form they already use → CCA approves in Notion and flips a "Show on website" toggle → the site picks it up (webhook, with a 15-minute poll as fallback), copying posters across, de-duplicating by Notion page ID, with an approval gate and a field allowlist. Saad (ResLife) is the panel's Notion specialist — expect detailed questions here.
-- **The society portal** is the differentiator, and the biggest scope risk. Honest recommendation: ship **AUD booking and event proposals at launch**, the rest by summer. Promising all six types by late February, with four people also carrying coursework, is how student projects die.
+- **The society portal** (now out of scope; CCA asked for the public site only) was the differentiator and the biggest scope risk. Honest recommendation: ship **AUD booking and event proposals at launch**, the rest by summer. Promising all six types by late February, with four people also carrying coursework, is how student projects die.
 - CCA supplies the content and has explicitly asked for something **low-maintenance**.
 
 ### Likely questions from the panel

@@ -1,19 +1,7 @@
 /* CCA website — content and sample data.
-   Safe to edit: societies, events, venues, request types, bookings.
+   Safe to edit: societies, events, news and gallery.
    Everything here is plain data. No logic lives in this file. */
 
-/* Bookable rooms: HSS (Mushtaq Ahmad Gurmani School of Humanities and Social Sciences) A1 to A15.
-   Capacities are placeholders until CCA confirms the real seat counts. */
-var VENUES=[
- {id:"A1",name:"HSS A1",cap:250,notes:"Tiered, projector, mics"},{id:"A2",name:"HSS A2",cap:200,notes:"Tiered, projector, mics"},
- {id:"A3",name:"HSS A3",cap:160,notes:"Tiered, projector"},{id:"A4",name:"HSS A4",cap:120,notes:"Projector, mics"},
- {id:"A5",name:"HSS A5",cap:120,notes:"Projector, mics"},{id:"A6",name:"HSS A6",cap:90,notes:"Projector"},
- {id:"A7",name:"HSS A7",cap:80,notes:"Projector"},{id:"A8",name:"HSS A8",cap:80,notes:"Projector"},
- {id:"A9",name:"HSS A9",cap:60,notes:"Flat room, movable chairs"},{id:"A10",name:"HSS A10",cap:60,notes:"Flat room, movable chairs"},
- {id:"A11",name:"HSS A11",cap:50,notes:"Seminar room"},{id:"A12",name:"HSS A12",cap:45,notes:"Seminar room"},
- {id:"A13",name:"HSS A13",cap:40,notes:"Seminar room"},{id:"A14",name:"HSS A14",cap:35,notes:"Seminar room"},
- {id:"A15",name:"HSS A15",cap:30,notes:"Seminar room"}
-];
 var CATS=["Academic","Arts & Culture","Debate & MUN","Service","Sports","Tech","Media"];
 var SOCIETIES=[
  {id:"lds",name:"Debates and Recitation at LUMS",short:"DRUMS",cat:"Debate & MUN",tag:"Debating, recitation and public speaking",recruiting:true,deadline:"28 February 2027",logo:"img/soc/dr_0.png",photo:"",
@@ -100,8 +88,18 @@ var SOCIETIES=[
 var NEWS=[
  {d:"2027-02-12",title:"Spring recruitment opens for 30+ societies"},
  {d:"2027-02-06",title:"LUMUN 2027 confirms record international delegation"},
- {d:"2027-01-29",title:"New venue booking process: one request, one reference"},
+ {d:"2027-01-29",title:"Society Handbook 2026–27 is now online"},
  {d:"2027-01-21",title:"CCA Excellence Awards: nominations now open"}
+];
+/* Homepage highlights carousel. Each slide belongs to a real society and links to its page. */
+var HIGHLIGHTS=[
+ {src:"img/banner/lcss.jpg",soc:"lcss",title:"Community, every weekend",text:"Volunteering drives and school partnerships across Lahore."},
+ {src:"img/photo/equestrian.jpg",soc:"equestrian",title:"Arena Polo",text:"The Equestrian Club brings polo to campus."},
+ {src:"img/photo/riayat.jpg",soc:"riayat",title:"Project Urban Inclusive",text:"Riayat’s community projects with partner schools."},
+ {src:"img/banner/las.jpg",soc:"las",title:"Above the snowline",text:"Treks and expeditions with the Adventure Society."},
+ {src:"img/banner/rdo.jpg",soc:"radio",title:"On air",text:"Student shows and podcasts from Radio LUMS."},
+ {src:"img/photo/lees.jpg",soc:"lees",title:"SOE EduTalk",text:"LEES on teaching, learning and outreach."},
+ {src:"img/banner/lp.jpg",soc:"lawpol",title:"Law and politics",text:"Talks and moots on governance and public policy."}
 ];
 /* Photos and logos are from cca.lums.edu.pk; each one is credited to the society it belongs to. */
 var GALLERY=[
@@ -130,49 +128,4 @@ var PAST=[
  {id:"p1",soc:"lumun",title:"LUMUN 2026",d:"2026-01-15",venue:"Campus-wide"},
  {id:"p2",soc:"tes",title:"LUMICS V",d:"2026-11-08",venue:"Main Auditorium"},
  {id:"p3",soc:"rizq",title:"Winter Food Drive",d:"2026-12-12",venue:"Khoka Area"}
-];
-var BOOKINGS=[
- {venue:"A1",d:"2027-02-18",from:"17:00",to:"21:00",by:"LUMUN Society",what:"LUMUN 2027 opening ceremony"},
- {venue:"A2",d:"2027-02-18",from:"18:00",to:"20:00",by:"The Economics Society",what:"Policy roundtable"},
- {venue:"A6",d:"2027-02-18",from:"16:00",to:"19:00",by:"LUMS Dramaline",what:"Rehearsal"},
- {venue:"A1",d:"2027-02-24",from:"14:00",to:"18:00",by:"The Economics Society",what:"LUMICS speaker session"},
- {venue:"A3",d:"2027-02-20",from:"17:30",to:"20:00",by:"LUMS Culture Society",what:"Film & Conversation"},
- {venue:"A4",d:"2027-02-25",from:"18:30",to:"21:00",by:"LUMS Entrepreneurial Society",what:"Founders' Pitch Night"},
- {venue:"A5",d:"2027-02-26",from:"19:00",to:"23:00",by:"SPADES",what:"Build Night"}
-];
-var REQ_TYPES=[
- {id:"venue",name:"Venue booking",blurb:"Book an HSS room, A1 to A15. Enter your date and headcount first; only rooms that are free and big enough can be picked.",icon:"building",sla:"1 working day"},
- {id:"pr",name:"PR request",blurb:"Get an event onto CCA's channels: Instagram, campus screens, the student mailer.",icon:"mega",sla:"1 working day"},
- {id:"event",name:"Event proposal",blurb:"Propose an event for approval. Once approved it appears on the website.",icon:"cal",sla:"1 working day"},
- {id:"logistics",name:"Equipment and logistics",blurb:"Chairs, tables, sound, projector, standees and setup support.",icon:"box",sla:"1 working day"},
- {id:"noc",name:"Sponsorship or NOC",blurb:"Clearance to approach a sponsor, and the no-objection certificate.",icon:"doc",sla:"1 working day"},
- {id:"profile",name:"Society profile update",blurb:"Change how to join, your description or socials on the website.",icon:"user",sla:"1 working day"},
- {id:"other",name:"Other request",blurb:"Anything that doesn't fit above. Tell us what you need and CCA routes it to the right person.",icon:"dots",sla:"1 working day"}
-];
-var STATUS={submitted:{label:"Submitted",cls:"grey"},review:{label:"In review",cls:""},changes:{label:"Changes requested",cls:"warn"},
- approved:{label:"Approved",cls:"ok"},declined:{label:"Declined",cls:"bad"},done:{label:"Completed",cls:"ok"}};
-var seq=412;
-var REQUESTS=[
- {ref:"CCA-EVT-0407",type:"event",soc:"lds",title:"Debate Open House",status:"approved",created:"2027-02-04",
-  fields:{Date:"18 February 2027",Time:"6:00–8:00 PM",Venue:"HSS A9",Attendance:"60","Open to":"All students"},
-  body:"Informal evening of short debates and conversation with the council, aimed at first-years.",
-  trail:[["Submitted by Hiba Ahmed","4 Feb, 11:04"],["Opened by Ayesha Arshad (CCA)","4 Feb, 15:20"],["Approved by Ayesha Arshad (CCA)","5 Feb, 10:12"],["Published to the website","5 Feb, 10:12"]],published:true},
- {ref:"CCA-AUD-0409",type:"venue",soc:"tes",title:"LUMICS speaker session",status:"approved",created:"2027-02-06",
-  fields:{Venue:"HSS A1",Date:"Wednesday, 24 February",Time:"14:00\u201318:00",Attendance:"220",Setup:"AV and projector, Microphones"},slot:{v:"A1",d:"2027-02-24",from:"14:00",to:"18:00",att:220},
-  body:"Keynote and panel for LUMICS. Needs the stage set for five speakers.",
-  trail:[["Submitted by Muhammad Mustafa","6 Feb, 09:31"],["Approved by Ayesha Arshad (CCA)","7 Feb, 12:02"]]},
- {ref:"CCA-PR-0410",type:"pr",soc:"lcss",title:"Community Clean-up promotion",status:"review",created:"2027-02-09",
-  fields:{Channels:"CCA Instagram, Student mailer","Publish on":"15 February 2027","Event date":"22 February 2027"},
-  body:"Poster attached. Caption focuses on the sign-up link and the 10 AM start.",
-  trail:[["Submitted by Zara Butt","9 Feb, 16:48"],["Opened by Ayesha Arshad (CCA)","10 Feb, 09:15"]]},
- {ref:"CCA-NOC-0411",type:"noc",soc:"les",title:"Title sponsor clearance for YLES",status:"changes",created:"2027-02-10",
-  fields:{Company:"Meezan Bank",Package:"Title sponsor",Amount:"PKR 1,200,000",Contact:"Zoya Iqbal"},
-  body:"Request clearance to approach Meezan Bank as title sponsor for YLES 2027.",
-  trail:[["Submitted by Zoya Iqbal","10 Feb, 13:22"],["Changes requested by Ayesha Arshad (CCA)","11 Feb, 10:40"]],
-  note:"Please attach the draft sponsorship deck and confirm whether the company has an existing LUMS agreement."}
-];
-var EMAILS=[
- {to:"cca@lums.edu.pk",cc:"drums@lums.edu.pk",subj:"[CCA-EVT-0407] Approved — Debate Open House",when:"5 Feb, 10:12 AM",body:"The event proposal has been approved and published to cca.lums.edu.pk."},
- {to:"tes@lums.edu.pk",cc:"cca@lums.edu.pk",subj:"[CCA-AUD-0409] Approved — Main Auditorium, 24 Feb",when:"7 Feb, 12:02 PM",body:"Main Auditorium is confirmed for 2:00–6:00 PM on 24 February 2027."},
- {to:"les@lums.edu.pk",cc:"cca@lums.edu.pk",subj:"[CCA-NOC-0411] Changes requested",when:"11 Feb, 10:40 AM",body:"Please attach the draft sponsorship deck and confirm any existing LUMS agreement."}
 ];
